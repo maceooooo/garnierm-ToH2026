@@ -1,8 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, computed } from '@angular/core';
 import { HeroInterface } from '../../data/heroInterface';
 import { UpperCasePipe } from '@angular/common';
 import { form, FormField } from '@angular/forms/signals';
-import { HEROES } from '../../data/mock-heroes';
+import { HeroService } from '../../services/hero-service';
 import { HeroDetailComponent } from '../hero-detail-component/hero-detail-component';
 import { HeroEditComponent } from '../hero-edit-component/hero-edit-component';
 
@@ -31,8 +31,11 @@ export class HeroesComponent {
   heroForm = form(this.heroModel);
 */
 
+  // Injection du service HeroService
+  private heroService = inject(HeroService);
+
   // Signal contenant la liste des héros
-  heroesModel = signal<HeroInterface[]>(HEROES);
+  heroesModel = signal<HeroInterface[]>([]);
 
   // Signal contenant le héros sélectionné
   selectedHeroModel = signal<HeroInterface | null>(null);
@@ -51,4 +54,10 @@ export class HeroesComponent {
     // Met à jour le héros sélectionné
     this.selectedHeroModel.set(updatedHero);
   }
+
+  // Mise à jour de la liste des héros lors de l'initialisation du composant
+  ngOnInit() {
+    this.heroService.getHeroes().subscribe((heroes) => {
+      this.heroesModel.set(heroes);
+    });  }
 }
