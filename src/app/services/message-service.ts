@@ -5,7 +5,7 @@ export class MessageService {
   messages = signal<string[]>([]);
 
   add(message: string): void {
-    this.messages.update((messages) => [...messages, message]);
+    this.messages.update((messages) => [...messages, message].slice(-3));
   }
 
   clear(): void {
