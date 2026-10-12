@@ -3,6 +3,6 @@
 
 <form (submit)="$event.preventDefault(); save()">
   <input type="text" [formField]="heroForm.name" />
-  <input type="checkbox" [formField]="heroForm.actif" />
+  <label> Actif : <input type="checkbox" [formField]="heroForm.actif" /></label>
   <button type="submit">Enregistrer les modifications</button>
 </form>

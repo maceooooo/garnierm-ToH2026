@@ -1,0 +1,17 @@
+:host {
+  display: block;
+  margin: 15px 0;
+}
+
+div {
+  margin: 8px 0;
+}
+
+div:first-child {
+  font-size: 18px;
+  color: #369;
+}
+
+div:first-child b {
+  font-weight: bold;
+}

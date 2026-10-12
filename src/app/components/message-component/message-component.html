@@ -1,0 +1,8 @@
+@if (messageService.messages().length > 0) {
+  <div class="message-box">
+    <button (click)="hideMessage()">×</button>
+    @for (message of messageService.messages(); track $index) {
+      <p>{{ message }}</p>
+    }
+  </div>
+}

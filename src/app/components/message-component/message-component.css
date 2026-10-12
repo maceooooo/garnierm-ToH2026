@@ -1,0 +1,26 @@
+.message-box {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 30px 10px 10px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #ccc;
+  z-index: 1000;
+}
+
+.message-box button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.message-box p {
+  margin: 5px 0;
+}

@@ -1,0 +1,100 @@
+:host {
+  display: block;
+  margin: 20px 0;
+  padding: 20px;
+  background: #f7f7f7;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+/* Titre */
+h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #369;
+}
+
+/* Détails du héros */
+app-hero-detail-component {
+  display: block;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 5px;
+}
+
+/* Formulaire */
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+/* Champ du nom */
+input[type="text"] {
+  width: 100%;
+  max-width: 300px;
+  padding: 9px;
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: #369;
+  box-shadow: 0 0 4px #3695;
+}
+
+/* Libellé et case à cocher */
+label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #333;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* Case à cocher */
+input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: #369;
+  cursor: pointer;
+}
+
+/* Bouton d'enregistrement */
+button {
+  padding: 10px 16px;
+  background: #369;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #247;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Adaptation aux petits écrans */
+@media (max-width: 600px) {
+  :host {
+    padding: 12px;
+  }
+
+  input[type="text"] {
+    max-width: 100%;
+  }
+}

@@ -1,7 +1,8 @@
-import { Component, input, linkedSignal, output } from '@angular/core';
+import { Component, input, linkedSignal, output, inject } from '@angular/core';
 import { HeroInterface } from '../../data/heroInterface';
 import { form, FormField } from '@angular/forms/signals';
 import { HeroDetailComponent } from '../hero-detail-component/hero-detail-component';
+import { MessageService } from '../../services/message-service';
 
 @Component({
   imports: [HeroDetailComponent, FormField],
@@ -12,6 +13,8 @@ import { HeroDetailComponent } from '../hero-detail-component/hero-detail-compon
 export class HeroEditComponent {
   // INPUT : Signal contenant le héros en entrée, pas modifiable directement par le composant
   hero = input.required<HeroInterface>();
+
+  messageService = inject(MessageService);
 
   // OUTPUT : Signal de sortie pour notifier le parent d'un changement de héros
   heroChange = output<HeroInterface>();
@@ -25,5 +28,6 @@ export class HeroEditComponent {
   // Retourne le signal du héros modifié
   save() {
     this.heroChange.emit(this.heroModel());
+    this.messageService.add('Les modifications du héros ont été enregistrées.');
   }
 }
