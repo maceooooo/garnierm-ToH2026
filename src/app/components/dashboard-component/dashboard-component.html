@@ -1,1 +1,11 @@
-<p>dashboard-componnent works!</p>
+<h2>Héros Populaires</h2>
+
+<ul class="heroes">
+  @for (hero of heroesModel(); track hero.id) {
+    <li>
+        <span>{{hero.id}}</span>&nbsp;
+        <span>{{hero.name}}</span>&nbsp;
+        <span>{{ hero.actif ? "&check;" : "&#10007;" }}</span>
+    </li>
+  }
+</ul>

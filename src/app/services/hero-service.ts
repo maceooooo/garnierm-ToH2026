@@ -11,14 +11,14 @@ export class HeroService {
   private messageService = inject(MessageService);
 
   // Retourne la liste des héros sous forme d'Observable
-  getHeroes(): Observable<HeroInterface[]> {
-    //return of(this.heroes);
-
+  getHeroes(maxHeroes: number = -1): Observable<HeroInterface[]> {
     // Simulation d'une arrivée en retard des données
     const heroes: Observable<HeroInterface[]> = new Observable((observer) => {
-      observer.next(HEROES.slice(0, 2)); // émission des 2 premiers héros
+      // Si maxHeroes vaut -1, on récupère tous les héros
+      const listeHeroes = maxHeroes === -1 ? this.heroes : this.heroes.slice(0, maxHeroes);
+      observer.next(listeHeroes.slice(0, 2)); // émission des 2 premiers héros
       setTimeout(() => {
-        observer.next(HEROES); // émission de tous les héros
+        observer.next(listeHeroes); // émission de tous les héros
         this.messageService.add('HeroService : héros récupérés avec succès');
         observer.complete();
       }, 3000);
@@ -27,3 +27,4 @@ export class HeroService {
     return heroes;
   }
 }
+
