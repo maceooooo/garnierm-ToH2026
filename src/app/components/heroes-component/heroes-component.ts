@@ -5,9 +5,11 @@ import { form, FormField } from '@angular/forms/signals';
 import { HeroService } from '../../services/hero-service';
 import { HeroDetailComponent } from '../hero-detail-component/hero-detail-component';
 import { HeroEditComponent } from '../hero-edit-component/hero-edit-component';
+import { RouterLink, RouterOutlet } from '@angular/router';
+import { MessageComponent } from '../message-component/message-component';
 
 @Component({
-  imports: [FormField, UpperCasePipe, HeroDetailComponent, HeroEditComponent], // les modules/composants utilisés peuvent s'ajouter ici (optionnel)
+  imports: [RouterOutlet, RouterLink, HeroDetailComponent, HeroEditComponent, MessageComponent], // les modules/composants utilisés peuvent s'ajouter ici (optionnel)
   selector: 'app-heroes-component', // tag pour importer le composant
   styleUrl: './heroes-component.css',
   templateUrl: './heroes-component.html',
@@ -43,7 +45,6 @@ export class HeroesComponent {
   // Selection d'un héros
   onSelect(hero: HeroInterface): void {
     this.selectedHeroModel.set(hero);
-    console.log(this.selectedHeroModel());
   }
   protected onHeroChange(updatedHero: HeroInterface) {
     // Met à jour la liste des héros avec le héros modifié
@@ -59,5 +60,6 @@ export class HeroesComponent {
   ngOnInit() {
     this.heroService.getHeroes().subscribe((heroes) => {
       this.heroesModel.set(heroes);
-    });  }
+    });
+  }
 }
