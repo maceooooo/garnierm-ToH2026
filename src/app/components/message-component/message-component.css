@@ -15,10 +15,22 @@
   position: absolute;
   top: 0;
   right: 0;
-  border: none;
-  background: none;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #5c6b80;
   cursor: pointer;
-  font-size: 24px;
+  font-size: 22px;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.message-box button:hover {
+  background: #eaf1fc;
+  color: #193e79;
 }
 
 .message-box p {

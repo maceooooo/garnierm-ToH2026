@@ -1,19 +1,15 @@
-<h2>Étape 2 : liste de héros</h2>
+<h2>Liste des héros</h2>
 
 <ul class="heroes">
   @for (hero of heroesModel(); track hero.id) {
     <li>
-      <button type="button" (click)="onSelect(hero)" [class.selected]="hero === selectedHeroModel()">
-        <span>{{hero.id}}</span>&nbsp;
-        <span>{{hero.name}}</span>&nbsp;
-        <span>{{ hero.actif ? "&check;" : "&#10007;" }}</span></button>
+      <a [routerLink]="['/detail', hero.id]">
+        <span>{{ hero.id }}</span>&nbsp;
+        <span>{{ hero.name }}</span>&nbsp;
+        <span [attr.aria-label]="hero.actif ? 'Actif' : 'Inactif'">
+          {{ hero.actif ? 'Actif' : 'Inactif' }}
+        </span>
+      </a>
     </li>
   }
 </ul>
-
-@if (selectedHeroModel(); as hero) {
-  <app-hero-detail-component [hero]="hero"></app-hero-detail-component>
-  <app-hero-edit-component [hero]="hero" (heroChange)="onHeroChange($event)"/>
-} @else {
-  <p>Aucun héros sélectionné</p>
-}

@@ -1,4 +1,11 @@
-<div><b>Détails de {{ hero().name }}</b></div>
-<div>id: {{ hero().id }}</div>
-<div>name: {{ hero().name }}</div>
-<div>actif: {{ hero().actif ? "&check;" : "&#10007;" }}</div>
+@if (hero(); as selectedHero) {
+  <h2>Détails de {{ selectedHero.name }}</h2>
+  <div>Identifiant : {{ selectedHero.id }}</div>
+  <div>Nom : {{ selectedHero.name }}</div>
+  <div>Actif : {{ selectedHero.actif ? 'Oui' : 'Non' }}</div>
+  <app-hero-edit-component [hero]="selectedHero" (heroChange)="onHeroChange($event)" />
+} @else {
+  <h2>Héros introuvable</h2>
+  <p>Ce héros n’existe pas dans la liste actuelle.</p>
+  <a routerLink="/heroes">Retour à la liste des héros</a>
+}

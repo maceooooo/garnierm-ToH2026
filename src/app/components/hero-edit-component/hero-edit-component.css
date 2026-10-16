@@ -2,16 +2,16 @@
   display: block;
   margin: 20px 0;
   padding: 20px;
-  background: #f7f7f7;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  background: #f7f9fc;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
 }
 
 /* Titre */
 h3 {
   margin-top: 0;
   margin-bottom: 15px;
-  color: #369;
+  color: var(--color-primary-dark);
 }
 
 /* Détails du héros */
@@ -20,8 +20,8 @@ app-hero-detail-component {
   margin-bottom: 20px;
   padding: 10px;
   background: white;
-  border: 1px solid #eee;
-  border-radius: 5px;
+  border: 1px solid #e5ebf3;
+  border-radius: 10px;
 }
 
 /* Formulaire */
@@ -33,20 +33,22 @@ form {
 }
 
 /* Champ du nom */
-input[type="text"] {
+.hero-edit input[type="text"] {
   width: 100%;
   max-width: 300px;
   padding: 9px;
-  border: 1px solid #bbb;
-  border-radius: 5px;
+  border: 1px solid #bdc9d9;
+  border-radius: 9px;
   box-sizing: border-box;
-  font-size: 14px;
+  font: inherit;
+  font-size: 0.95rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
-input[type="text"]:focus {
+.hero-edit input[type="text"]:focus {
   outline: none;
-  border-color: #369;
-  box-shadow: 0 0 4px #3695;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px #2457a626;
 }
 
 /* Libellé et case à cocher */
@@ -54,7 +56,7 @@ label {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #333;
+  color: var(--color-text);
   font-size: 15px;
   cursor: pointer;
 }
@@ -64,28 +66,33 @@ input[type="checkbox"] {
   width: 17px;
   height: 17px;
   margin: 0;
-  accent-color: #369;
+  accent-color: var(--color-primary);
   cursor: pointer;
 }
 
 /* Bouton d'enregistrement */
-button {
+.hero-edit button {
   padding: 10px 16px;
-  background: #369;
+  background: var(--color-primary);
   color: white;
   border: none;
-  border-radius: 5px;
-  font-size: 14px;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s;
+  box-shadow: 0 3px 8px #193e7926;
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
-button:hover {
-  background: #247;
+.hero-edit button:hover {
+  background: var(--color-primary-dark);
+  box-shadow: 0 5px 12px #193e7933;
+  transform: translateY(-1px);
 }
 
-button:active {
-  transform: scale(0.98);
+.hero-edit button:active {
+  transform: translateY(0);
 }
 
 /* Adaptation aux petits écrans */
@@ -94,7 +101,7 @@ button:active {
     padding: 12px;
   }
 
-  input[type="text"] {
+  .hero-edit input[type="text"] {
     max-width: 100%;
   }
 }

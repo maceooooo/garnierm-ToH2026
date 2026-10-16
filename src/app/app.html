@@ -1,7 +1,10 @@
 <h1>{{ title() }}</h1>
-<nav>
-  <a routerLink="/heroes">Heroes</a>
-  <a routerLink="/dashboard">Dashboard</a>
+<nav class="main-nav" aria-label="Navigation principale">
+  <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a>
+  <a routerLink="/heroes" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Tous les héros</a>
+  <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+    Tableau de bord
+  </a>
 </nav>
 
 <router-outlet></router-outlet>

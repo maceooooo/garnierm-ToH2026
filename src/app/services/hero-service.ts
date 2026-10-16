@@ -26,5 +26,14 @@ export class HeroService {
 
     return heroes;
   }
-}
 
+  getHero(id: number): HeroInterface | undefined {
+    return this.heroes.find((hero) => hero.id === id);
+  }
+
+  updateHero(updatedHero: HeroInterface): void {
+    this.heroes = this.heroes.map((hero) =>
+      hero.id === updatedHero.id ? updatedHero : hero,
+    );
+  }
+}

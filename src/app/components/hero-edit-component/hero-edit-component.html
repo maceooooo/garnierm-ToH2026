@@ -1,8 +1,8 @@
 <h3>Modifier le héros</h3>
-<app-hero-detail-component [hero]="heroModel()"></app-hero-detail-component>
 
-<form (submit)="$event.preventDefault(); save()">
-  <input type="text" [formField]="heroForm.name" />
-  <label> Actif : <input type="checkbox" [formField]="heroForm.actif" /></label>
+<form class="hero-edit" (submit)="$event.preventDefault(); save()">
+  <label for="hero-name">Nom du héros</label>
+  <input id="hero-name" type="text" [formField]="heroForm.name" />
+  <label class="hero-active">Actif <input type="checkbox" [formField]="heroForm.actif" /></label>
   <button type="submit">Enregistrer les modifications</button>
 </form>

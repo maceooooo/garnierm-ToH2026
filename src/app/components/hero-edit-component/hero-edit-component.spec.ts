@@ -11,6 +11,7 @@ describe('HeroEditComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(HeroEditComponent);
+    fixture.componentRef.setInput('hero', { id: 7, name: 'Hero V', actif: true });
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

@@ -1,11 +1,10 @@
 import { Component, input, linkedSignal, output, inject } from '@angular/core';
 import { HeroInterface } from '../../data/heroInterface';
 import { form, FormField } from '@angular/forms/signals';
-import { HeroDetailComponent } from '../hero-detail-component/hero-detail-component';
 import { MessageService } from '../../services/message-service';
 
 @Component({
-  imports: [HeroDetailComponent, FormField],
+  imports: [FormField],
   selector: 'app-hero-edit-component',
   styleUrl: './hero-edit-component.css',
   templateUrl: './hero-edit-component.html',

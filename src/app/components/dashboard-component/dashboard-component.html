@@ -3,9 +3,13 @@
 <ul class="heroes">
   @for (hero of heroesModel(); track hero.id) {
     <li>
-        <span>{{hero.id}}</span>&nbsp;
-        <span>{{hero.name}}</span>&nbsp;
-        <span>{{ hero.actif ? "&check;" : "&#10007;" }}</span>
+      <a [routerLink]="['/detail', hero.id]">
+        <span>{{ hero.id }}</span>&nbsp;
+        <span>{{ hero.name }}</span>&nbsp;
+        <span [attr.aria-label]="hero.actif ? 'Actif' : 'Inactif'">
+          {{ hero.actif ? 'Actif' : 'Inactif' }}
+        </span>
+      </a>
     </li>
   }
 </ul>

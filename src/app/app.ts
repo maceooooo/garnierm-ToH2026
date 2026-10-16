@@ -1,10 +1,9 @@
 import { Component, signal } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
-import { HeroesComponent } from './components/heroes-component/heroes-component';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MessageComponent } from './components/message-component/message-component';
 
 @Component({
-  imports: [RouterOutlet, MessageComponent, RouterLink],
+  imports: [RouterOutlet, MessageComponent, RouterLink, RouterLinkActive],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
