@@ -1,5 +1,6 @@
 <h3>Modifier le héros</h3>
 
+<!-- L'envoi explicite valide le brouillon et évite le rechargement natif de la page. -->
 <form class="hero-edit" (submit)="$event.preventDefault(); save()">
   <label for="hero-name">Nom du héros</label>
   <input id="hero-name" type="text" [formField]="heroForm.name" />

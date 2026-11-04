@@ -1,12 +1,15 @@
 <h2>Héros Populaires</h2>
 
+<!-- L'ID sert à la navigation et au suivi Angular, tandis que le nom identifie le héros à l'écran. -->
 <ul class="heroes">
   @for (hero of heroesModel(); track hero.id) {
     <li>
       <a [routerLink]="['/detail', hero.id]">
-        <span>{{ hero.id }}</span>&nbsp;
-        <span>{{ hero.name }}</span>&nbsp;
-        <span [attr.aria-label]="hero.actif ? 'Actif' : 'Inactif'">
+        <span class="hero-name">{{ hero.name }}</span>
+        <span
+          class="hero-status"
+          [attr.aria-label]="hero.actif ? 'Actif' : 'Inactif'"
+        >
           {{ hero.actif ? 'Actif' : 'Inactif' }}
         </span>
       </a>

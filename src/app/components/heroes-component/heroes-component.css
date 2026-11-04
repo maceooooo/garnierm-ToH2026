@@ -1,8 +1,10 @@
+/* La marge sépare le titre de la navigation précédente. */
 h2 {
   color: #369;
   margin-top: 25px;
 }
 
+/* Le titre de la liste reste cohérent avec les autres vues grâce à la couleur de thème. */
 h2 {
   color: var(--color-primary-dark);
 }

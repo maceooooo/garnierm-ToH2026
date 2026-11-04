@@ -7,14 +7,14 @@
   border-radius: 14px;
 }
 
-/* Titre */
+/* Le panneau distingue l'édition des détails tout en restant dans la palette commune. */
 h3 {
   margin-top: 0;
   margin-bottom: 15px;
   color: var(--color-primary-dark);
 }
 
-/* Détails du héros */
+/* Ancien point d'intégration conservé pour maintenir le style des fiches imbriquées éventuelles. */
 app-hero-detail-component {
   display: block;
   margin-bottom: 20px;
@@ -24,7 +24,7 @@ app-hero-detail-component {
   border-radius: 10px;
 }
 
-/* Formulaire */
+/* Les contrôles sont empilés afin de garder un ordre de lecture clair sur les petits écrans. */
 form {
   display: flex;
   flex-direction: column;
@@ -32,7 +32,7 @@ form {
   gap: 15px;
 }
 
-/* Champ du nom */
+/* Le champ texte hérite de la typographie du formulaire et garde un focus perceptible. */
 .hero-edit input[type="text"] {
   width: 100%;
   max-width: 300px;
@@ -51,7 +51,7 @@ form {
   box-shadow: 0 0 0 3px #2457a626;
 }
 
-/* Libellé et case à cocher */
+/* Les libellés restent cliquables et alignés avec leurs contrôles associés. */
 label {
   display: flex;
   align-items: center;
@@ -61,7 +61,7 @@ label {
   cursor: pointer;
 }
 
-/* Case à cocher */
+/* La couleur d'accent rattache l'état actif au thème de l'application. */
 input[type="checkbox"] {
   width: 17px;
   height: 17px;
@@ -70,7 +70,7 @@ input[type="checkbox"] {
   cursor: pointer;
 }
 
-/* Bouton d'enregistrement */
+/* Le contraste visuel identifie l'action principale du formulaire. */
 .hero-edit button {
   padding: 10px 16px;
   background: var(--color-primary);
@@ -95,7 +95,7 @@ input[type="checkbox"] {
   transform: translateY(0);
 }
 
-/* Adaptation aux petits écrans */
+/* Le panneau et le champ s'adaptent à la largeur réduite sans débordement. */
 @media (max-width: 600px) {
   :host {
     padding: 12px;

@@ -1,4 +1,5 @@
 <h1>{{ title() }}</h1>
+<!-- La navigation conserve un état actif distinct pour chaque page principale. -->
 <nav class="main-nav" aria-label="Navigation principale">
   <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a>
   <a routerLink="/heroes" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Tous les héros</a>
@@ -7,5 +8,7 @@
   </a>
 </nav>
 
+<!-- Les pages sont rendues ici sans démonter la navigation commune. -->
 <router-outlet></router-outlet>
+<!-- Les notifications globales restent accessibles quelle que soit la route affichée. -->
 <app-message-component></app-message-component>

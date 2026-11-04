@@ -1,7 +1,9 @@
+/* La règle globale évite que bordures et marges faussent les dimensions calculées. */
 * {
   box-sizing: border-box;
 }
 
+/* La mise en page part d'un fond neutre et conserve une largeur mobile minimale. */
 body {
   min-width: 320px;
   margin: 0;
@@ -48,39 +50,28 @@ body {
 .home nav a:focus-visible,
 .hero-edit button:focus-visible,
 .message-box button:focus-visible {
+  /* Un contour explicite maintient un repère visible lors de la navigation au clavier. */
   outline: 3px solid #82a9e8;
   outline-offset: 3px;
 }
 
-.heroes a span:first-child {
-  display: grid;
-  flex: 0 0 32px;
-  width: 32px;
-  height: 32px;
-  place-items: center;
-  border-radius: 9px;
-  background: #eaf1fc;
-  color: #2457a6;
-  font-size: 0.85rem;
-  font-weight: 750;
-}
-
-.heroes a span:nth-child(2) {
+.heroes a .hero-name {
   flex: 1;
   font-weight: 650;
 }
 
-.heroes a span:last-child {
+.heroes a .hero-status {
   color: #18764a;
   font-size: 0.9rem;
   font-weight: 700;
 }
 
-.heroes a span:last-child[aria-label="Inactif"] {
+.heroes a .hero-status[aria-label="Inactif"] {
   color: #a33a3a;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Respecte la préférence système sans supprimer les repères visuels de transition. */
   *,
   *::before,
   *::after {

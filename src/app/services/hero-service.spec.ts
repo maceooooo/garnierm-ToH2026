@@ -1,24 +1,106 @@
 import { TestBed } from '@angular/core/testing';
+import { Firestore } from '@angular/fire/firestore';
+import { afterEach, vi } from 'vitest';
+import { firstValueFrom, of } from 'rxjs';
+import { HeroInterface } from '../data/heroInterface';
 import { HeroService } from './hero-service';
+import { MessageService } from './message-service';
 
+const { collectionSnapshotsMock, docSnapshotsMock, updateDocMock } = vi.hoisted(() => ({
+  collectionSnapshotsMock: vi.fn(),
+  docSnapshotsMock: vi.fn(),
+  updateDocMock: vi.fn(),
+}));
+
+vi.mock('@angular/fire/firestore', () => ({
+  Firestore: class Firestore {},
+  collection: vi.fn(() => ({})),
+  collectionSnapshots: collectionSnapshotsMock,
+  doc: vi.fn(() => ({})),
+  docSnapshots: docSnapshotsMock,
+  orderBy: vi.fn(() => ({})),
+  query: vi.fn(() => ({})),
+  updateDoc: updateDocMock,
+}));
+
+// Ces tests vérifient le flux Firestore, l'identifiant de document et la persistance des modifications.
 describe('HeroService', () => {
   let service: HeroService;
+  const mockHeroes: HeroInterface[] = [
+    { id: 'hero-a1', name: 'Hero A', actif: true },
+    { id: 'hero-b2', name: 'Hero B', actif: true },
+  ];
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    collectionSnapshotsMock.mockReturnValue(
+      of(
+        mockHeroes.map((hero) => ({
+          data: () => ({ name: hero.name, actif: hero.actif }),
+          id: hero.id,
+        })),
+      ),
+    );
+    docSnapshotsMock.mockReturnValue(
+      of({
+        data: () => ({ name: mockHeroes[0].name, actif: mockHeroes[0].actif }),
+        exists: () => true,
+        id: mockHeroes[0].id,
+      }),
+    );
+    updateDocMock.mockResolvedValue(undefined);
+    TestBed.configureTestingModule({
+      providers: [{ provide: Firestore, useValue: {} }],
+    });
     service = TestBed.inject(HeroService);
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+  it('should load a hero by its Firebase document id', async () => {
+    await expect(firstValueFrom(service.getHero('hero-a1'))).resolves.toEqual(
+      mockHeroes[0],
+    );
   });
 
-  it('should return and update a hero by id', () => {
-    const hero = service.getHero(7);
-    expect(hero?.name).toBe('Hero V');
+  it('should return undefined when the requested document does not exist', async () => {
+    docSnapshotsMock.mockReturnValueOnce(
+      of({ exists: () => false, id: 'missing-document' }),
+    );
 
-    service.updateHero({ id: 7, name: 'Hero modifié', actif: false });
+    await expect(firstValueFrom(service.getHero('missing-document'))).resolves.toBeUndefined();
+  });
 
-    expect(service.getHero(7)).toEqual({ id: 7, name: 'Hero modifié', actif: false });
+  it('should update the document fields without overwriting its id', async () => {
+    const updatedHero = { ...mockHeroes[0], name: 'Hero modifié', actif: false };
+
+    await service.updateHero(updatedHero);
+
+    expect(updateDocMock).toHaveBeenCalledWith(expect.anything(), {
+      name: 'Hero modifié',
+      actif: false,
+    });
+  });
+
+  it('should emit heroes progressively every 200 ms on the initial snapshot', () => {
+    vi.useFakeTimers();
+    const receivedHeroIds: string[][] = [];
+
+    service.getHeroes(2).subscribe((heroes) => {
+      receivedHeroIds.push(heroes.map((hero) => hero.id));
+    });
+
+    vi.advanceTimersByTime(0);
+    expect(receivedHeroIds).toEqual([['hero-a1']]);
+
+    vi.advanceTimersByTime(199);
+    expect(receivedHeroIds).toEqual([['hero-a1']]);
+
+    vi.advanceTimersByTime(1);
+    expect(receivedHeroIds).toEqual([['hero-a1'], ['hero-a1', 'hero-b2']]);
+    expect(TestBed.inject(MessageService).messages()).toEqual([
+      'HeroService : héros récupérés avec succès',
+    ]);
   });
 });

@@ -9,5 +9,6 @@ import { MessageComponent } from './components/message-component/message-compone
   templateUrl: './app.html',
 })
 export class App {
+  // Le signal permet au template de suivre toute évolution du titre sans lecture ponctuelle de sa valeur.
   title = signal('Macéo Garnier ToH2026');
 }

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MessageComponent } from './message-component';
 
+// Le test confirme que le panneau de notifications peut être monté sans message préalable.
 describe('MessageComponent', () => {
   let component: MessageComponent;
   let fixture: ComponentFixture<MessageComponent>;

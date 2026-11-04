@@ -1,7 +1,6 @@
-import { Component, input, linkedSignal, output, inject } from '@angular/core';
+import { Component, input, linkedSignal, output } from '@angular/core';
 import { HeroInterface } from '../../data/heroInterface';
 import { form, FormField } from '@angular/forms/signals';
-import { MessageService } from '../../services/message-service';
 
 @Component({
   imports: [FormField],
@@ -10,23 +9,19 @@ import { MessageService } from '../../services/message-service';
   templateUrl: './hero-edit-component.html',
 })
 export class HeroEditComponent {
-  // INPUT : Signal contenant le héros en entrée, pas modifiable directement par le composant
+  // L'entrée conserve la valeur de référence du parent; le brouillon peut donc être modifié sans l'écraser.
   hero = input.required<HeroInterface>();
 
-  messageService = inject(MessageService);
-
-  // OUTPUT : Signal de sortie pour notifier le parent d'un changement de héros
+  // Le parent reçoit le brouillon uniquement à l'enregistrement, pas à chaque frappe.
   heroChange = output<HeroInterface>();
 
-  // Utilisation de linkedSignal pour créer un signal contenant une copie du héros en entrée, afin de pouvoir le modifier dans le formulaire
+  // linkedSignal réinitialise le brouillon si le parent sélectionne ou recharge un autre héros.
   heroModel = linkedSignal(() => ({ ...this.hero() }));
 
-  // Création du formulaire à partir du signal heroModel
   heroForm = form(this.heroModel);
 
-  // Retourne le signal du héros modifié
+  /** Émet le brouillon au parent, qui effectue l'écriture persistante et gère son résultat. */
   save() {
     this.heroChange.emit(this.heroModel());
-    this.messageService.add('Les modifications du héros ont été enregistrées.');
   }
 }

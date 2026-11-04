@@ -1,3 +1,4 @@
+/* La fiche est isolée du flux de navigation tout en gardant un espacement régulier. */
 :host {
   display: block;
   margin: 15px 0;
@@ -8,6 +9,7 @@ div {
 }
 
 div:first-child {
+  /* Le premier bloc sert d'en-tête visuel avant les autres attributs du héros. */
   font-size: 18px;
   color: #369;
 }

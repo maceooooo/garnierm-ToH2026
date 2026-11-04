@@ -10,6 +10,7 @@ import { MessageService } from '../../services/message-service';
 export class MessageComponent {
   messageService = inject(MessageService);
 
+  /** Efface toutes les notifications affichées par le service partagé. */
   hideMessage(): void {
     this.messageService.clear();
   }

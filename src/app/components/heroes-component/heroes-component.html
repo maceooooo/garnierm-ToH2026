@@ -1,12 +1,15 @@
 <h2>Liste des héros</h2>
 
+<!-- L'ID reste dans le lien pour retrouver le document; le nom est l'information lisible pour la personne. -->
 <ul class="heroes">
   @for (hero of heroesModel(); track hero.id) {
     <li>
       <a [routerLink]="['/detail', hero.id]">
-        <span>{{ hero.id }}</span>&nbsp;
-        <span>{{ hero.name }}</span>&nbsp;
-        <span [attr.aria-label]="hero.actif ? 'Actif' : 'Inactif'">
+        <span class="hero-name">{{ hero.name }}</span>
+        <span
+          class="hero-status"
+          [attr.aria-label]="hero.actif ? 'Actif' : 'Inactif'"
+        >
           {{ hero.actif ? 'Actif' : 'Inactif' }}
         </span>
       </a>

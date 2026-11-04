@@ -1,3 +1,4 @@
+/* Le titre reprend la couleur de thème définie par le composant racine. */
 h2 {
   color: var(--color-primary-dark);
 }

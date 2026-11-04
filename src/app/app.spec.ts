@@ -1,17 +1,30 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { of } from 'rxjs';
 import { App } from './app';
 import { routes } from './app.routes';
 import { DashboardComponent } from './components/dashboard-component/dashboard-component';
 import { HeroDetailComponent } from './components/hero-detail-component/hero-detail-component';
 import { HomeComponent } from './components/home-component/home-component';
+import { HeroService } from './services/hero-service';
 
+// Ces tests couvrent le montage de l'application et la résolution de ses routes essentielles.
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter(routes)],
+      providers: [
+        provideRouter(routes),
+        {
+          provide: HeroService,
+          useValue: {
+            getHeroes: () => of([]),
+            getHero: (id: string) =>
+              of({ id, name: 'Hero V', actif: true }),
+          },
+        },
+      ],
     })
       .compileComponents();
   });
@@ -36,8 +49,9 @@ describe('App', () => {
     expect(home).toBeTruthy();
 
     await harness.navigateByUrl('/dashboard', DashboardComponent);
-    const detail = await harness.navigateByUrl('/detail/7', HeroDetailComponent);
+    // L'identifiant de l'URL est transmis à la fiche du héros correspondante.
+    const detail = await harness.navigateByUrl('/detail/hero-a1', HeroDetailComponent);
 
-    expect(detail.hero()?.id).toBe(7);
+    expect(detail.hero()?.id).toBe('hero-a1');
   });
 });

@@ -7,4 +7,5 @@ import { RouterLink } from '@angular/router';
   styleUrl: './home-component.css',
   templateUrl: './home-component.html',
 })
+// La page d'accueil est principalement statique; sa navigation est définie dans le template.
 export class HomeComponent {}

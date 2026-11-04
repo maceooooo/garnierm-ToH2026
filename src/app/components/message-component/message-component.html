@@ -1,4 +1,5 @@
 @if (messageService.messages().length > 0) {
+  <!-- Le conteneur n'existe que lorsqu'il y a des notifications à consulter. -->
   <div class="message-box">
     <button (click)="hideMessage()">×</button>
     @for (message of messageService.messages(); track $index) {

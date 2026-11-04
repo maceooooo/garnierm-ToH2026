@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HeroService } from '../../services/hero-service';
 import { HeroInterface } from '../../data/heroInterface';
+import { MessageService } from '../../services/message-service';
 
 @Component({
   imports: [RouterLink],
@@ -10,15 +11,17 @@ import { HeroInterface } from '../../data/heroInterface';
   templateUrl: './dashboard-component.html',
 })
 export class DashboardComponent {
-  // Injection du service HeroService
+  // Le tableau de bord limite sa requête aux quatre premiers héros triés par le service.
   private heroService = inject(HeroService);
+  private messageService = inject(MessageService);
 
-  // Signal contenant la liste des héros
   heroesModel = signal<HeroInterface[]>([]);
 
   ngOnInit() {
-    this.heroService.getHeroes(4).subscribe((heroes) => {
-      this.heroesModel.set(heroes);
+    // Chaque émission (y compris les mises à jour Firestore) remplace la liste affichée par le nouvel instantané.
+    this.heroService.getHeroes(4).subscribe({
+      next: (heroes) => this.heroesModel.set(heroes),
+      error: () => this.messageService.add('Impossible de charger les héros du tableau de bord.'),
     });
   }
 }

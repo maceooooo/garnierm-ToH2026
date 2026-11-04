@@ -9,6 +9,7 @@
   color: var(--color-muted);
 }
 
+/* Les cartes s'alignent sur la largeur disponible et passent à la ligne si nécessaire. */
 .home .home-links {
   display: flex;
   flex-wrap: wrap;
