@@ -6,9 +6,10 @@ import { HeroInterface } from '../data/heroInterface';
 import { HeroService } from './hero-service';
 import { MessageService } from './message-service';
 
-const { addDocMock, collectionSnapshotsMock, docSnapshotsMock, updateDocMock } = vi.hoisted(() => ({
+const { addDocMock, collectionSnapshotsMock, deleteDocMock, docSnapshotsMock, updateDocMock } = vi.hoisted(() => ({
   addDocMock: vi.fn(),
   collectionSnapshotsMock: vi.fn(),
+  deleteDocMock: vi.fn(),
   docSnapshotsMock: vi.fn(),
   updateDocMock: vi.fn(),
 }));
@@ -18,6 +19,7 @@ vi.mock('@angular/fire/firestore', () => ({
   addDoc: addDocMock,
   collection: vi.fn(() => ({})),
   collectionSnapshots: collectionSnapshotsMock,
+  deleteDoc: deleteDocMock,
   doc: vi.fn(() => ({})),
   docSnapshots: docSnapshotsMock,
   orderBy: vi.fn(() => ({})),
@@ -55,6 +57,7 @@ describe('HeroService', () => {
       }),
     );
     addDocMock.mockResolvedValue({ id: 'hero-new1' });
+    deleteDocMock.mockResolvedValue(undefined);
     updateDocMock.mockResolvedValue(undefined);
     TestBed.configureTestingModule({
       providers: [{ provide: Firestore, useValue: {} }],
@@ -103,6 +106,12 @@ describe('HeroService', () => {
       'Le nom du héros est obligatoire.',
     );
     expect(addDocMock).not.toHaveBeenCalled();
+  });
+
+  it('should delete the hero document by its Firebase id', async () => {
+    await service.deleteHero('hero-a1');
+
+    expect(deleteDocMock).toHaveBeenCalledWith(expect.anything());
   });
 
   it('should emit heroes progressively every 200 ms on the initial snapshot', () => {

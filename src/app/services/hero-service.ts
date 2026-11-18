@@ -5,6 +5,7 @@ import {
   addDoc,
   collection,
   collectionSnapshots,
+  deleteDoc,
   doc,
   docSnapshots,
   orderBy,
@@ -141,5 +142,15 @@ export class HeroService {
       favori: hero.favori,
     });
     return document.id;
+  }
+
+  /**
+   * Supprime définitivement le document héros identifié dans Firestore.
+   *
+   * @param id Identifiant Firestore du héros à supprimer.
+   * @returns Une promesse résolue après la suppression ou rejetée si Firestore la refuse.
+   */
+  deleteHero(id: string): Promise<void> {
+    return deleteDoc(doc(this.firestore, 'heroes', id));
   }
 }

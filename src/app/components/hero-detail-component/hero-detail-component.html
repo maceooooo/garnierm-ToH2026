@@ -1,19 +1,72 @@
 @if (hero(); as selectedHero) {
   <!-- Cette page reste en lecture seule; l'édition a une route dédiée. -->
-  <h2>Détails de {{ selectedHero.name }}</h2>
+  <div class="hero-detail-title">
+    <h2>Détails de {{ selectedHero.name }}</h2>
+    <div class="hero-detail-actions">
+      <button
+        type="button"
+        class="hero-action hero-edit-action"
+        [routerLink]="['/heroes', selectedHero.id, 'edit']"
+        [attr.aria-label]="'Modifier ' + selectedHero.name"
+        title="Modifier le héros"
+      >
+        ✎
+      </button>
+      <button
+        type="button"
+        class="hero-action hero-delete-action"
+        [attr.aria-label]="'Supprimer ' + selectedHero.name"
+        title="Supprimer le héros"
+        [disabled]="isDeleting()"
+        (click)="openDeleteConfirmation()"
+      >
+        🗑
+      </button>
+    </div>
+  </div>
   <div>Identifiant : {{ selectedHero.id }}</div>
   <div>Nom : {{ selectedHero.name }}</div>
   <div>Favori : {{ selectedHero.favori ? 'Oui ★' : 'Non' }}</div>
-  <button
-    type="button"
-    class="navigation-button"
-    [routerLink]="['/heroes', selectedHero.id, 'edit']"
-  >
-    Modifier le héros
-  </button>
 } @else {
   <!-- L'état vide fournit une sortie claire au lieu d'afficher des détails incomplets. -->
   <h2>Héros introuvable</h2>
   <p>Ce héros n’existe pas dans la liste actuelle.</p>
   <a routerLink="/heroes">Retour à la liste des héros</a>
+}
+
+@if (isDeleteConfirmationOpen() && hero(); as selectedHero) {
+  <!-- La confirmation visuelle évite les dialogues natifs et garde la suppression explicite. -->
+  <div class="delete-dialog-backdrop" (click)="closeDeleteConfirmation()">
+    <section
+      class="delete-dialog"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="delete-dialog-title"
+      aria-describedby="delete-dialog-description"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="delete-dialog-title">Supprimer le héros ?</h2>
+      <p id="delete-dialog-description">
+        Le héros « {{ selectedHero.name }} » sera définitivement supprimé.
+      </p>
+      <div class="delete-dialog-actions">
+        <button
+          type="button"
+          class="delete-cancel-button"
+          [disabled]="isDeleting()"
+          (click)="closeDeleteConfirmation()"
+        >
+          Annuler
+        </button>
+        <button
+          type="button"
+          class="delete-confirm-button"
+          [disabled]="isDeleting()"
+          (click)="deleteHero(selectedHero)"
+        >
+          {{ isDeleting() ? 'Suppression…' : 'Supprimer' }}
+        </button>
+      </div>
+    </section>
+  </div>
 }

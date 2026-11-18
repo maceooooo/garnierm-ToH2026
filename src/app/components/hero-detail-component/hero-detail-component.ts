@@ -1,5 +1,5 @@
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { of, switchMap } from 'rxjs';
 import { HeroInterface } from '../../data/heroInterface';
@@ -17,6 +17,10 @@ export class HeroDetailComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private heroService = inject(HeroService);
   private messageService = inject(MessageService);
+  private router = inject(Router);
+
+  isDeleting = signal(false);
+  isDeleteConfirmationOpen = signal(false);
 
   hero = signal<HeroInterface | null>(null);
 
@@ -37,4 +41,34 @@ export class HeroDetailComponent implements OnInit {
       });
   }
 
+  openDeleteConfirmation(): void {
+    if (!this.isDeleting()) {
+      this.isDeleteConfirmationOpen.set(true);
+    }
+  }
+
+  closeDeleteConfirmation(): void {
+    if (!this.isDeleting()) {
+      this.isDeleteConfirmationOpen.set(false);
+    }
+  }
+
+  async deleteHero(hero: HeroInterface): Promise<void> {
+    if (this.isDeleting()) {
+      return;
+    }
+
+    this.isDeleting.set(true);
+    try {
+      await this.heroService.deleteHero(hero.id);
+    } catch {
+      this.isDeleting.set(false);
+      this.messageService.add('Impossible de supprimer le héros. Vérifiez la connexion et les règles Firestore.');
+      return;
+    }
+
+    this.messageService.add('Le héros a été supprimé.');
+    this.isDeleteConfirmationOpen.set(false);
+    await this.router.navigateByUrl('/heroes');
+  }
 }
