@@ -1,10 +1,16 @@
 @if (hero(); as selectedHero) {
-  <!-- La fiche d'édition n'apparaît que si l'identifiant de route correspond à un héros connu. -->
+  <!-- Cette page reste en lecture seule; l'édition a une route dédiée. -->
   <h2>Détails de {{ selectedHero.name }}</h2>
   <div>Identifiant : {{ selectedHero.id }}</div>
   <div>Nom : {{ selectedHero.name }}</div>
-  <div>Actif : {{ selectedHero.actif ? 'Oui' : 'Non' }}</div>
-  <app-hero-edit-component [hero]="selectedHero" (heroChange)="onHeroChange($event)" />
+  <div>Favori : {{ selectedHero.favori ? 'Oui ★' : 'Non' }}</div>
+  <button
+    type="button"
+    class="navigation-button"
+    [routerLink]="['/heroes', selectedHero.id, 'edit']"
+  >
+    Modifier le héros
+  </button>
 } @else {
   <!-- L'état vide fournit une sortie claire au lieu d'afficher des détails incomplets. -->
   <h2>Héros introuvable</h2>

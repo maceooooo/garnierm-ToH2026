@@ -18,8 +18,8 @@ export class DashboardComponent {
   heroesModel = signal<HeroInterface[]>([]);
 
   ngOnInit() {
-    // Chaque émission (y compris les mises à jour Firestore) remplace la liste affichée par le nouvel instantané.
-    this.heroService.getHeroes(4).subscribe({
+    // Firestore filtre les favoris; le plafond limite le nombre de cartes sur le tableau de bord.
+    this.heroService.getHeroes(4, true).subscribe({
       next: (heroes) => this.heroesModel.set(heroes),
       error: () => this.messageService.add('Impossible de charger les héros du tableau de bord.'),
     });

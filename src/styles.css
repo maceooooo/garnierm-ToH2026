@@ -20,54 +20,86 @@ body {
 }
 
 .heroes li {
+  display: flex;
+  align-items: center;
   min-width: 0;
+  padding: 4px 8px 4px 16px;
+  border: 1px solid #d7e0ec;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 5px #2432470a;
 }
 
-.heroes a {
+.heroes li:hover {
+  border-color: #9cb8e2;
+  background: #f7faff;
+}
+
+.heroes a.hero-view-link {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 12px;
   min-height: 56px;
-  padding: 12px 16px;
-  border: 1px solid #d7e0ec;
-  border-radius: 12px;
-  background: #fff;
   color: #243247;
   text-decoration: none;
-  box-shadow: 0 2px 5px #2432470a;
-  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease,
-    transform 160ms ease;
 }
 
-.heroes a:hover {
-  transform: translateY(-2px);
-  border-color: #9cb8e2;
-  background: #f7faff;
-  box-shadow: 0 6px 14px #24324712;
+.heroes .hero-edit-link {
+  display: grid;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 8px;
+  color: #2457a6;
+  font-size: 1.3rem;
+  text-decoration: none;
+}
+
+.heroes .hero-edit-link:hover {
+  background: #eaf1fc;
+}
+
+.navigation-button {
+  display: inline-block;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--color-primary);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.navigation-button:hover {
+  background: var(--color-primary-dark);
+}
+
+.heroes .hero-favorite {
+  color: #d99a00;
+  font-size: 1.2rem;
+  line-height: 1;
 }
 
 .heroes a:focus-visible,
 .home nav a:focus-visible,
-.hero-edit button:focus-visible,
+.form-actions button:focus-visible,
+.create-hero-button:focus-visible,
+.hero-edit-link:focus-visible,
+.navigation-button:focus-visible,
 .message-box button:focus-visible {
   /* Un contour explicite maintient un repère visible lors de la navigation au clavier. */
   outline: 3px solid #82a9e8;
   outline-offset: 3px;
 }
 
-.heroes a .hero-name {
+.heroes .hero-name {
   flex: 1;
   font-weight: 650;
-}
-
-.heroes a .hero-status {
-  color: #18764a;
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-
-.heroes a .hero-status[aria-label="Inactif"] {
-  color: #a33a3a;
 }
 
 @media (prefers-reduced-motion: reduce) {

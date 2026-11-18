@@ -9,7 +9,7 @@ import { HeroesComponent } from './heroes-component';
 describe('HeroesComponent', () => {
   let component: HeroesComponent;
   let fixture: ComponentFixture<HeroesComponent>;
-  const hero: HeroInterface = { id: 'hero-a1', name: 'Hero A', actif: true };
+  const hero: HeroInterface = { id: 'hero-a1', name: 'Hero A', favori: true };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -33,8 +33,12 @@ describe('HeroesComponent', () => {
     fixture.detectChanges();
 
     const heroLink = fixture.nativeElement.querySelector('.heroes a') as HTMLAnchorElement;
+    const editLink = fixture.nativeElement.querySelector('.hero-edit-link') as HTMLAnchorElement;
+    const favorite = heroLink.querySelector('.hero-favorite') as HTMLElement;
     expect(heroLink.textContent).toContain('Hero A');
     expect(heroLink.textContent).not.toContain('hero-a1');
     expect(heroLink.getAttribute('href')).toBe('/detail/hero-a1');
+    expect(favorite.textContent).toContain('★');
+    expect(editLink.getAttribute('href')).toBe('/heroes/hero-a1/edit');
   });
 });

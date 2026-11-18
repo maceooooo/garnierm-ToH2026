@@ -21,7 +21,7 @@ describe('App', () => {
           useValue: {
             getHeroes: () => of([]),
             getHero: (id: string) =>
-              of({ id, name: 'Hero V', actif: true }),
+              of({ id, name: 'Hero V', favori: true }),
           },
         },
       ],

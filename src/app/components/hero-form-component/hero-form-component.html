@@ -1,0 +1,37 @@
+<section class="hero-form">
+  @if (isLoading()) {
+    <p role="status">Chargement du héros…</p>
+  } @else if (isEditing() && !heroModel().name) {
+    <h2>Héros introuvable</h2>
+    <p>Ce héros n’existe pas dans la liste actuelle.</p>
+    <a routerLink="/heroes">Retour à la liste des héros</a>
+  } @else {
+    <h2>{{ isEditing() ? 'Modifier le héros' : 'Créer un héros' }}</h2>
+
+    <!-- Le même formulaire édite les champs métier ou en crée un nouveau; le service choisit l'opération Firestore. -->
+    <form (submit)="$event.preventDefault(); saveHero()">
+      <label for="hero-name">Nom du héros</label>
+      <input id="hero-name" type="text" [formField]="heroForm.name" />
+
+      <label class="hero-favorite">
+        Favori
+        <input type="checkbox" [formField]="heroForm.favori" />
+      </label>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="isSaving()">
+          {{
+            isSaving()
+              ? 'Enregistrement…'
+              : isEditing()
+                ? 'Enregistrer les modifications'
+                : 'Créer le héros'
+          }}
+        </button>
+        <button type="button" class="navigation-button" routerLink="/heroes">
+          Annuler
+        </button>
+      </div>
+    </form>
+  }
+</section>

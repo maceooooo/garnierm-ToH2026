@@ -1,5 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
+import { By } from '@angular/platform-browser';
+import {
+  ActivatedRoute,
+  convertToParamMap,
+  provideRouter,
+  RouterLink,
+} from '@angular/router';
 import { of } from 'rxjs';
 import { HeroInterface } from '../../data/heroInterface';
 import { HeroService } from '../../services/hero-service';
@@ -21,7 +27,7 @@ describe('HeroDetailComponent', () => {
             getHero: (id: string) =>
               of<HeroInterface | undefined>(
                 id === 'hero-a1'
-                  ? { id, name: 'Hero A', actif: true }
+                  ? { id, name: 'Hero A', favori: true }
                   : undefined,
               ),
             updateHero: () => Promise.resolve(),
@@ -42,5 +48,17 @@ describe('HeroDetailComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
     expect(component.hero()?.id).toBe('hero-a1');
+  });
+
+  it('should render a button to edit the displayed hero', () => {
+    fixture.detectChanges();
+
+    const editButton = fixture.nativeElement.querySelector('.navigation-button') as HTMLButtonElement;
+    expect(editButton.textContent).toContain('Modifier le héros');
+    expect(editButton.tagName).toBe('BUTTON');
+    const editRoute = fixture.debugElement
+      .query(By.css('.navigation-button'))
+      .injector.get(RouterLink);
+    expect(editRoute.urlTree?.toString()).toBe('/heroes/hero-a1/edit');
   });
 });

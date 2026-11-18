@@ -2,6 +2,7 @@ import { Service, inject } from '@angular/core';
 import {
   DocumentSnapshot,
   Firestore,
+  addDoc,
   collection,
   collectionSnapshots,
   doc,
@@ -9,6 +10,7 @@ import {
   orderBy,
   query,
   updateDoc,
+  where,
 } from '@angular/fire/firestore';
 import { HeroInterface } from '../data/heroInterface';
 import { Observable, concatMap, from, map, of, switchMap, tap, timer } from 'rxjs';
@@ -17,12 +19,21 @@ import { MessageService } from './message-service';
 /** Valide le contenu stocké et utilise l'ID Firestore comme identité du héros. */
 function mapHeroDocument(document: DocumentSnapshot): HeroInterface {
   const data = document.data();
-  if (!data || typeof data['name'] !== 'string' || typeof data['actif'] !== 'boolean') {
+  if (
+    !data ||
+    typeof data['name'] !== 'string' ||
+    (data['favori'] !== undefined && typeof data['favori'] !== 'boolean')
+  ) {
     throw new Error(`Le document héros "${document.id}" ne respecte pas le format attendu.`);
   }
 
   // L'identifiant Firestore est la clé canonique, même si le document contient aussi un champ `id`.
-  return { id: document.id, name: data['name'], actif: data['actif'] };
+  // Les anciens documents restent lisibles avant migration et deviennent non favoris par défaut.
+  return {
+    id: document.id,
+    name: data['name'],
+    favori: typeof data['favori'] === 'boolean' ? data['favori'] : false,
+  };
 }
 
 @Service()
@@ -34,18 +45,26 @@ export class HeroService {
    * Écoute les héros Firestore et révèle progressivement le premier résultat.
    *
    * @param maxHeroes Nombre maximal de héros à émettre, ou -1 pour tous les héros.
+   * @param favoritesOnly Limite les résultats aux héros marqués comme favoris.
    * @returns Un Observable actualisé à chaque changement de la collection.
    * @remarks Les erreurs Firestore et les documents invalides sont émises par l'Observable.
    */
-  getHeroes(maxHeroes: number = -1): Observable<HeroInterface[]> {
+  getHeroes(maxHeroes: number = -1, favoritesOnly = false): Observable<HeroInterface[]> {
     let isInitialSnapshot = true;
     const heroesCollection = collection(this.firestore, 'heroes');
-    const heroesQuery = query(heroesCollection, orderBy('name'));
+    const heroesQuery = favoritesOnly
+      ? query(heroesCollection, where('favori', '==', true))
+      : query(heroesCollection, orderBy('name'));
 
     // Chaque instantané est validé puis limité; seule la réponse initiale est révélée progressivement.
     return collectionSnapshots(heroesQuery).pipe(
-      map((documents) =>
-        documents.map(mapHeroDocument),
+      map((documents) => documents.map(mapHeroDocument)),
+      map((heroes) =>
+        favoritesOnly
+          ? heroes
+              .filter((hero) => hero.favori)
+              .sort((first, second) => first.name.localeCompare(second.name, 'fr'))
+          : heroes,
       ),
       map((heroes) => (maxHeroes === -1 ? heroes : heroes.slice(0, maxHeroes))),
       switchMap((heroes) => {
@@ -89,7 +108,7 @@ export class HeroService {
   }
 
   /**
-   * Met à jour le nom et l'état actif sans modifier l'identifiant du document.
+   * Met à jour le nom et le statut favori sans modifier l'identifiant du document.
    *
    * @param updatedHero Héros contenant son ID Firestore et les valeurs à enregistrer.
    * @returns Une promesse résolue après l'écriture, rejetée si Firestore refuse la mise à jour.
@@ -99,7 +118,28 @@ export class HeroService {
     // Une mise à jour partielle préserve les autres champs éventuels du document.
     return updateDoc(heroDocument, {
       name: updatedHero.name,
-      actif: updatedHero.actif,
+      favori: updatedHero.favori,
     });
+  }
+
+  /**
+   * Crée un document héros et laisse Firestore générer son identifiant.
+   *
+   * @param hero Nom et statut favori du nouveau héros.
+   * @returns L'identifiant Firestore du document créé.
+   * @throws Une erreur si le nom est vide ou si Firestore refuse l'écriture.
+   */
+  async createHero(hero: Omit<HeroInterface, 'id'>): Promise<string> {
+    const name = hero.name.trim();
+    if (!name) {
+      throw new Error('Le nom du héros est obligatoire.');
+    }
+
+    // addDoc génère un ID unique; les données ne contiennent que les champs métier du héros.
+    const document = await addDoc(collection(this.firestore, 'heroes'), {
+      name,
+      favori: hero.favori,
+    });
+    return document.id;
   }
 }

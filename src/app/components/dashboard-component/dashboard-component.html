@@ -1,17 +1,20 @@
-<h2>Héros Populaires</h2>
+<h2>Héros favoris</h2>
 
 <!-- L'ID sert à la navigation et au suivi Angular, tandis que le nom identifie le héros à l'écran. -->
 <ul class="heroes">
   @for (hero of heroesModel(); track hero.id) {
     <li>
-      <a [routerLink]="['/detail', hero.id]">
+      <a class="hero-view-link" [routerLink]="['/detail', hero.id]">
         <span class="hero-name">{{ hero.name }}</span>
-        <span
-          class="hero-status"
-          [attr.aria-label]="hero.actif ? 'Actif' : 'Inactif'"
-        >
-          {{ hero.actif ? 'Actif' : 'Inactif' }}
-        </span>
+        <span class="hero-favorite" aria-label="Favori" title="Favori">★</span>
+      </a>
+      <a
+        class="hero-edit-link"
+        [routerLink]="['/heroes', hero.id, 'edit']"
+        [attr.aria-label]="'Modifier ' + hero.name"
+        title="Modifier le héros"
+      >
+        ✎
       </a>
     </li>
   }

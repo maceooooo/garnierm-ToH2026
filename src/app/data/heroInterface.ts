@@ -2,6 +2,6 @@
 export interface HeroInterface {
   id: string;
   name: string;
-  /** Indique si le héros est actuellement actif dans la collection. */
-  actif: boolean;
+  /** Indique si le héros doit apparaître parmi les favoris. */
+  favori: boolean;
 }
