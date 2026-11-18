@@ -1,0 +1,52 @@
+@if (isLoading()) {
+  <p role="status">Chargement de l’arme…</p>
+} @else if (weapon(); as selectedWeapon) {
+  <div class="weapon-detail-title">
+    <h2>Détails de {{ selectedWeapon.name }}</h2>
+    <div class="weapon-detail-actions">
+      <a
+        class="weapon-action weapon-edit-action"
+        [routerLink]="['/weapons', selectedWeapon.id, 'edit']"
+        [attr.aria-label]="'Modifier ' + selectedWeapon.name"
+        title="Modifier l’arme"
+      >
+        ✎
+      </a>
+      <button
+        type="button"
+        class="weapon-action weapon-delete-action"
+        [attr.aria-label]="'Supprimer ' + selectedWeapon.name"
+        title="Supprimer l’arme"
+        [disabled]="isDeleting()"
+        (click)="openDeleteConfirmation()"
+      >
+        🗑
+      </button>
+    </div>
+  </div>
+  <div class="weapon-detail-content">
+    <div class="weapon-info">
+      <div>Identifiant : {{ selectedWeapon.id }}</div>
+      <div>Nom : {{ selectedWeapon.name }}</div>
+    </div>
+    <section class="weapon-bonuses" aria-label="Bonus de l’arme">
+      <p><app-stat-icon kind="pv" /> Bonus de PV : {{ selectedWeapon.bonusPv }}</p>
+      <p><app-stat-icon kind="degats" /> Bonus de dégâts : {{ selectedWeapon.bonusDegats }}</p>
+      <p><app-stat-icon kind="vitesse" /> Bonus de vitesse : {{ selectedWeapon.bonusVitesse }}</p>
+    </section>
+  </div>
+  <a class="weapon-back-link" routerLink="/weapons">Retour à la liste des armes</a>
+
+  @if (isDeleteConfirmationOpen()) {
+    <app-delete-confirmation
+      [itemName]="selectedWeapon.name"
+      [isDeleting]="isDeleting()"
+      (cancel)="closeDeleteConfirmation()"
+      (confirm)="deleteWeapon(selectedWeapon)"
+    />
+  }
+} @else {
+  <h2>Arme introuvable</h2>
+  <p>Cette arme n’existe pas dans la liste actuelle.</p>
+  <a routerLink="/weapons">Retour à la liste des armes</a>
+}

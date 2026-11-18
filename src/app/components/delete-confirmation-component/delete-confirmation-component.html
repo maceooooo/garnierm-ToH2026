@@ -1,0 +1,31 @@
+<div class="delete-dialog-backdrop" (click)="cancel.emit()">
+  <section
+    class="delete-dialog"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="delete-dialog-title"
+    aria-describedby="delete-dialog-description"
+    (click)="$event.stopPropagation()"
+  >
+    <h2 id="delete-dialog-title">Supprimer l’élément ?</h2>
+    <p id="delete-dialog-description">« {{ itemName() }} » sera définitivement supprimé.</p>
+    <div class="delete-dialog-actions">
+      <button
+        type="button"
+        class="delete-cancel-button"
+        [disabled]="isDeleting()"
+        (click)="cancel.emit()"
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="delete-confirm-button"
+        [disabled]="isDeleting()"
+        (click)="confirm.emit()"
+      >
+        {{ isDeleting() ? 'Suppression…' : 'Supprimer' }}
+      </button>
+    </div>
+  </section>
+</div>

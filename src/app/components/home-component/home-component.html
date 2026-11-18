@@ -1,6 +1,6 @@
 <section class="home">
   <h2>Bienvenue dans le Tour des Héros</h2>
-  <p>Choisissez une page pour découvrir les héros :</p>
+  <p>Choisissez une page pour découvrir les héros ou gérer leurs armes :</p>
 
   <!-- Ces cartes sont des liens de navigation complets vers les deux vues de découverte. -->
   <nav class="home-links" aria-label="Pages des héros">
@@ -15,6 +15,12 @@
       <h3>Tous les héros</h3>
       <p>Consultez la liste complète et ouvrez la fiche d’un héros.</p>
       <span class="home-link-action">Voir la liste complète →</span>
+    </a>
+    <a routerLink="/weapons">
+      <span class="home-link-icon" aria-hidden="true">⚔</span>
+      <h3>Armes</h3>
+      <p>Consultez, créez et gérez les armes et leurs bonus de statistiques.</p>
+      <span class="home-link-action">Gérer les armes →</span>
     </a>
   </nav>
 </section>

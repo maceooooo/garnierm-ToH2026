@@ -1,0 +1,25 @@
+<h2>Liste des armes</h2>
+
+<a class="create-weapon-button" routerLink="/weapons/new">Créer une arme +</a>
+
+@if (loadError(); as error) {
+  <p class="weapon-load-error" role="alert">{{ error }}</p>
+}
+
+<ul class="weapons">
+  @for (weapon of weapons(); track weapon.id) {
+    <li>
+      <a class="weapon-view-link" [routerLink]="['/weapons', weapon.id]">
+        <span class="weapon-name">{{ weapon.name }}</span>
+      </a>
+      <a
+        class="weapon-edit-link"
+        [routerLink]="['/weapons', weapon.id, 'edit']"
+        [attr.aria-label]="'Modifier ' + weapon.name"
+        title="Modifier l’arme"
+      >
+        ✎
+      </a>
+    </li>
+  }
+</ul>

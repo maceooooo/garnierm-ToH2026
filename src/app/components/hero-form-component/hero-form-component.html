@@ -21,13 +21,7 @@
       <fieldset class="hero-stats">
         <legend>Compétences (1 à 100)</legend>
         <label for="hero-pv">
-          <span class="stat-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path
-                d="M20.8 8.8c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10a4.6 4.6 0 0 1 8.8-1.9 4.6 4.6 0 0 1 8.8 1.9Z"
-              />
-            </svg>
-          </span>
+          <app-stat-icon class="stat-icon" kind="pv" />
           Points de vie (PV)
         </label>
         <input id="hero-pv" type="number" step="1" [formField]="heroForm.pv" />
@@ -36,11 +30,7 @@
         }
 
         <label for="hero-degats">
-          <span class="stat-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path d="m4 20 4-4m-2 2-2-2m4 0-2-2m4 0 9-9 3-3-1 4-9 9m-2-2 2 2m4-8 2 2" />
-            </svg>
-          </span>
+          <app-stat-icon class="stat-icon" kind="degats" />
           Dégâts
         </label>
         <input id="hero-degats" type="number" step="1" [formField]="heroForm.degats" />
@@ -49,14 +39,7 @@
         }
 
         <label for="hero-vitesse">
-          <span class="stat-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path
-                d="M2 8h4m-5 4h5m-4 4h4m3-2V4h3v7c0 2 1 3 3 3l4 1c2 .5 3 2 3 4v1H9c-2 0-3-1-3-3v-2h1c2 0 3-1 3-3Z"
-              />
-              <path d="M9 20h13" />
-            </svg>
-          </span>
+          <app-stat-icon class="stat-icon" kind="vitesse" />
           Vitesse
         </label>
         <input id="hero-vitesse" type="number" step="1" [formField]="heroForm.vitesse" />

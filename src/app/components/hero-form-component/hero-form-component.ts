@@ -5,9 +5,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, finalize, of, switchMap, tap } from 'rxjs';
 import { HeroService } from '../../services/hero-service';
 import { MessageService } from '../../services/message-service';
+import { StatIconComponent } from '../stat-icon-component/stat-icon-component';
 
 @Component({
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, StatIconComponent],
   selector: 'app-hero-form-component',
   styleUrl: './hero-form-component.css',
   templateUrl: './hero-form-component.html',

@@ -3,11 +3,13 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { of, switchMap } from 'rxjs';
 import { HeroInterface } from '../../data/heroInterface';
+import { DeleteConfirmationComponent } from '../delete-confirmation-component/delete-confirmation-component';
+import { StatIconComponent } from '../stat-icon-component/stat-icon-component';
 import { HeroService } from '../../services/hero-service';
 import { MessageService } from '../../services/message-service';
 
 @Component({
-  imports: [RouterLink],
+  imports: [RouterLink, StatIconComponent, DeleteConfirmationComponent],
   selector: 'app-hero-detail-component',
   styleUrl: './hero-detail-component.css',
   templateUrl: './hero-detail-component.html',
@@ -36,8 +38,7 @@ export class HeroDetailComponent implements OnInit {
       )
       .subscribe({
         next: (hero) => this.hero.set(hero ?? null),
-        error: () =>
-          this.messageService.add('Impossible de charger les détails du héros.'),
+        error: () => this.messageService.add('Impossible de charger les détails du héros.'),
       });
   }
 
@@ -63,7 +64,9 @@ export class HeroDetailComponent implements OnInit {
       await this.heroService.deleteHero(hero.id);
     } catch {
       this.isDeleting.set(false);
-      this.messageService.add('Impossible de supprimer le héros. Vérifiez la connexion et les règles Firestore.');
+      this.messageService.add(
+        'Impossible de supprimer le héros. Vérifiez la connexion et les règles Firestore.',
+      );
       return;
     }
 

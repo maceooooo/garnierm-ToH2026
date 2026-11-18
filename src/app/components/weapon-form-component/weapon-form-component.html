@@ -1,0 +1,69 @@
+<section class="weapon-form">
+  @if (isLoading()) {
+    <p role="status">Chargement de l’arme…</p>
+  } @else if (isEditing() && !weaponModel().name) {
+    <h2>Arme introuvable</h2>
+    <p>Cette arme n’existe pas dans la liste actuelle.</p>
+    <a routerLink="/weapons">Retour à la liste des armes</a>
+  } @else {
+    <h2>{{ isEditing() ? 'Modifier l’arme' : 'Créer une arme' }}</h2>
+
+    <form (submit)="$event.preventDefault(); saveWeapon()">
+      <label for="weapon-name">Nom de l’arme</label>
+      <input id="weapon-name" type="text" [formField]="weaponForm.name" />
+
+      <fieldset class="weapon-bonuses">
+        <legend>Bonus de statistiques (-50 à 50)</legend>
+        <label for="weapon-bonus-pv">
+          <app-stat-icon kind="pv" />
+          Bonus de PV
+        </label>
+        <input id="weapon-bonus-pv" type="number" step="1" [formField]="weaponForm.bonusPv" />
+        @if (weaponForm.bonusPv().touched() && weaponForm.bonusPv().invalid()) {
+          <span class="field-error">Le bonus de PV doit être compris entre -50 et 50.</span>
+        }
+
+        <label for="weapon-bonus-degats">
+          <app-stat-icon kind="degats" />
+          Bonus de dégâts
+        </label>
+        <input
+          id="weapon-bonus-degats"
+          type="number"
+          step="1"
+          [formField]="weaponForm.bonusDegats"
+        />
+        @if (weaponForm.bonusDegats().touched() && weaponForm.bonusDegats().invalid()) {
+          <span class="field-error">Le bonus de dégâts doit être compris entre -50 et 50.</span>
+        }
+
+        <label for="weapon-bonus-vitesse">
+          <app-stat-icon kind="vitesse" />
+          Bonus de vitesse
+        </label>
+        <input
+          id="weapon-bonus-vitesse"
+          type="number"
+          step="1"
+          [formField]="weaponForm.bonusVitesse"
+        />
+        @if (weaponForm.bonusVitesse().touched() && weaponForm.bonusVitesse().invalid()) {
+          <span class="field-error">Le bonus de vitesse doit être compris entre -50 et 50.</span>
+        }
+      </fieldset>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="isSaving()">
+          {{
+            isSaving()
+              ? 'Enregistrement…'
+              : isEditing()
+                ? 'Enregistrer les modifications'
+                : 'Créer l’arme'
+          }}
+        </button>
+        <button type="button" class="navigation-button" routerLink="/weapons">Annuler</button>
+      </div>
+    </form>
+  }
+</section>

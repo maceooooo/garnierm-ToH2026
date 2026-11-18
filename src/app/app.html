@@ -1,10 +1,17 @@
 <h1>{{ title() }}</h1>
 <!-- La navigation conserve un état actif distinct pour chaque page principale. -->
 <nav class="main-nav" aria-label="Navigation principale">
-  <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a>
-  <a routerLink="/heroes" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Tous les héros</a>
+  <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+    >Accueil</a
+  >
+  <a routerLink="/heroes" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+    >Tous les héros</a
+  >
   <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
     Tableau de bord
+  </a>
+  <a routerLink="/weapons" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+    Armes
   </a>
 </nav>
 
