@@ -28,7 +28,7 @@ describe('HeroFormComponent', () => {
     createHero = vi.fn().mockResolvedValue('hero-new1');
     updateHero = vi.fn().mockResolvedValue(undefined);
     getHero = vi.fn(() =>
-      of({ id: 'hero-a1', name: 'Hero A', favori: true }),
+      of({ id: 'hero-a1', name: 'Hero A', favori: true, pv: 80, degats: 25, vitesse: 60 }),
     );
     addMessage = vi.fn();
     routeParams = new BehaviorSubject(convertToParamMap({}));
@@ -63,17 +63,35 @@ describe('HeroFormComponent', () => {
       .query(By.css('.navigation-button'))
       .injector.get(RouterLink);
     expect(cancelRoute.urlTree?.toString()).toBe('/heroes');
-    component.heroModel.set({ name: '  Nouveau héros  ', favori: true });
+    component.heroModel.set({
+      name: '  Nouveau héros  ',
+      favori: true,
+      pv: 100,
+      degats: 1,
+      vitesse: 50,
+    });
 
     await component.saveHero();
 
-    expect(createHero).toHaveBeenCalledWith({ name: 'Nouveau héros', favori: true });
+    expect(createHero).toHaveBeenCalledWith({
+      name: 'Nouveau héros',
+      favori: true,
+      pv: 100,
+      degats: 1,
+      vitesse: 50,
+    });
     expect(addMessage).toHaveBeenCalledWith('Le héros a été créé avec succès.');
     expect(navigateByUrl).toHaveBeenCalledWith('/heroes');
   });
 
   it('should reject a blank name without writing to Firestore', async () => {
-    component.heroModel.set({ name: '   ', favori: false });
+    component.heroModel.set({
+      name: '   ',
+      favori: false,
+      pv: 50,
+      degats: 50,
+      vitesse: 50,
+    });
 
     await component.saveHero();
 
@@ -83,7 +101,13 @@ describe('HeroFormComponent', () => {
 
   it('should report write errors without navigating', async () => {
     createHero.mockRejectedValueOnce(new Error('permission-denied'));
-    component.heroModel.set({ name: 'Nouveau héros', favori: false });
+    component.heroModel.set({
+      name: 'Nouveau héros',
+      favori: false,
+      pv: 50,
+      degats: 50,
+      vitesse: 50,
+    });
 
     await component.saveHero();
 
@@ -96,7 +120,13 @@ describe('HeroFormComponent', () => {
   it('should load an existing hero and update it through the same form', async () => {
     routeParams.next(convertToParamMap({ id: 'hero-a1' }));
     await fixture.whenStable();
-    component.heroModel.set({ name: 'Hero A modifié', favori: false });
+    component.heroModel.set({
+      name: 'Hero A modifié',
+      favori: false,
+      pv: 90,
+      degats: 35,
+      vitesse: 40,
+    });
 
     await component.saveHero();
 
@@ -105,6 +135,9 @@ describe('HeroFormComponent', () => {
       id: 'hero-a1',
       name: 'Hero A modifié',
       favori: false,
+      pv: 90,
+      degats: 35,
+      vitesse: 40,
     });
     expect(createHero).not.toHaveBeenCalled();
     expect(addMessage).toHaveBeenCalledWith('Le héros a été modifié avec succès.');
@@ -113,7 +146,14 @@ describe('HeroFormComponent', () => {
   it('should stop showing the loading state after the first Firestore snapshot', async () => {
     getHero.mockReturnValueOnce(
       new Observable((subscriber) => {
-        subscriber.next({ id: 'hero-a1', name: 'Hero A', favori: true });
+        subscriber.next({
+          id: 'hero-a1',
+          name: 'Hero A',
+          favori: true,
+          pv: 80,
+          degats: 25,
+          vitesse: 60,
+        });
       }),
     );
     routeParams.next(convertToParamMap({ id: 'hero-a1' }));
@@ -121,5 +161,22 @@ describe('HeroFormComponent', () => {
 
     expect(component.isLoading()).toBe(false);
     expect(fixture.nativeElement.textContent).toContain('Modifier le héros');
+  });
+
+  it('should not save skills outside the allowed range', async () => {
+    component.heroModel.set({
+      name: 'Héros invalide',
+      favori: false,
+      pv: 50,
+      degats: 50,
+      vitesse: 101,
+    });
+
+    await component.saveHero();
+
+    expect(createHero).not.toHaveBeenCalled();
+    expect(addMessage).toHaveBeenCalledWith(
+      'Chaque compétence doit être un nombre entier entre 1 et 100.',
+    );
   });
 });

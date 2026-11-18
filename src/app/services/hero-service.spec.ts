@@ -6,13 +6,14 @@ import { HeroInterface } from '../data/heroInterface';
 import { HeroService } from './hero-service';
 import { MessageService } from './message-service';
 
-const { addDocMock, collectionSnapshotsMock, deleteDocMock, docSnapshotsMock, updateDocMock } = vi.hoisted(() => ({
-  addDocMock: vi.fn(),
-  collectionSnapshotsMock: vi.fn(),
-  deleteDocMock: vi.fn(),
-  docSnapshotsMock: vi.fn(),
-  updateDocMock: vi.fn(),
-}));
+const { addDocMock, collectionSnapshotsMock, deleteDocMock, docSnapshotsMock, updateDocMock } =
+  vi.hoisted(() => ({
+    addDocMock: vi.fn(),
+    collectionSnapshotsMock: vi.fn(),
+    deleteDocMock: vi.fn(),
+    docSnapshotsMock: vi.fn(),
+    updateDocMock: vi.fn(),
+  }));
 
 vi.mock('@angular/fire/firestore', () => ({
   Firestore: class Firestore {},
@@ -32,8 +33,8 @@ vi.mock('@angular/fire/firestore', () => ({
 describe('HeroService', () => {
   let service: HeroService;
   const mockHeroes: HeroInterface[] = [
-    { id: 'hero-a1', name: 'Hero A', favori: true },
-    { id: 'hero-b2', name: 'Hero B', favori: false },
+    { id: 'hero-a1', name: 'Hero A', favori: true, pv: 80, degats: 25, vitesse: 60 },
+    { id: 'hero-b2', name: 'Hero B', favori: false, pv: 50, degats: 40, vitesse: 70 },
   ];
 
   afterEach(() => {
@@ -44,14 +45,26 @@ describe('HeroService', () => {
     collectionSnapshotsMock.mockReturnValue(
       of(
         mockHeroes.map((hero) => ({
-          data: () => ({ name: hero.name, favori: hero.favori }),
+          data: () => ({
+            name: hero.name,
+            favori: hero.favori,
+            pv: hero.pv,
+            degats: hero.degats,
+            vitesse: hero.vitesse,
+          }),
           id: hero.id,
         })),
       ),
     );
     docSnapshotsMock.mockReturnValue(
       of({
-        data: () => ({ name: mockHeroes[0].name, favori: mockHeroes[0].favori }),
+        data: () => ({
+          name: mockHeroes[0].name,
+          favori: mockHeroes[0].favori,
+          pv: mockHeroes[0].pv,
+          degats: mockHeroes[0].degats,
+          vitesse: mockHeroes[0].vitesse,
+        }),
         exists: () => true,
         id: mockHeroes[0].id,
       }),
@@ -66,15 +79,11 @@ describe('HeroService', () => {
   });
 
   it('should load a hero by its Firebase document id', async () => {
-    await expect(firstValueFrom(service.getHero('hero-a1'))).resolves.toEqual(
-      mockHeroes[0],
-    );
+    await expect(firstValueFrom(service.getHero('hero-a1'))).resolves.toEqual(mockHeroes[0]);
   });
 
   it('should return undefined when the requested document does not exist', async () => {
-    docSnapshotsMock.mockReturnValueOnce(
-      of({ exists: () => false, id: 'missing-document' }),
-    );
+    docSnapshotsMock.mockReturnValueOnce(of({ exists: () => false, id: 'missing-document' }));
 
     await expect(firstValueFrom(service.getHero('missing-document'))).resolves.toBeUndefined();
   });
@@ -87,24 +96,65 @@ describe('HeroService', () => {
     expect(updateDocMock).toHaveBeenCalledWith(expect.anything(), {
       name: 'Hero modifié',
       favori: false,
+      pv: 80,
+      degats: 25,
+      vitesse: 60,
     });
+  });
+
+  it('should reject invalid statistics before updating Firestore', async () => {
+    updateDocMock.mockClear();
+
+    await expect(service.updateHero({ ...mockHeroes[0], vitesse: 0 })).rejects.toThrow(
+      'Le nom et les compétences du héros doivent être valides.',
+    );
+
+    expect(updateDocMock).not.toHaveBeenCalled();
   });
 
   it('should create a hero with a generated Firebase id and trimmed name', async () => {
     await expect(
-      service.createHero({ name: '  Nouveau héros  ', favori: true }),
+      service.createHero({
+        name: '  Nouveau héros  ',
+        favori: true,
+        pv: 100,
+        degats: 1,
+        vitesse: 50,
+      }),
     ).resolves.toBe('hero-new1');
 
     expect(addDocMock).toHaveBeenCalledWith(expect.anything(), {
       name: 'Nouveau héros',
       favori: true,
+      pv: 100,
+      degats: 1,
+      vitesse: 50,
     });
   });
 
   it('should reject a hero with an empty name without writing to Firestore', async () => {
-    await expect(service.createHero({ name: '   ', favori: true })).rejects.toThrow(
-      'Le nom du héros est obligatoire.',
-    );
+    await expect(
+      service.createHero({
+        name: '   ',
+        favori: true,
+        pv: 50,
+        degats: 50,
+        vitesse: 50,
+      }),
+    ).rejects.toThrow('Le nom du héros est obligatoire.');
+    expect(addDocMock).not.toHaveBeenCalled();
+  });
+
+  it('should reject statistics outside the allowed range without writing to Firestore', async () => {
+    await expect(
+      service.createHero({
+        name: 'Héros invalide',
+        favori: false,
+        pv: 101,
+        degats: 50,
+        vitesse: 50,
+      }),
+    ).rejects.toThrow('Chaque compétence doit être un nombre entier entre 1 et 100.');
     expect(addDocMock).not.toHaveBeenCalled();
   });
 
@@ -143,11 +193,46 @@ describe('HeroService', () => {
 
   it('should treat documents without a favorite field as non-favorites', async () => {
     collectionSnapshotsMock.mockReturnValueOnce(
-      of([{ data: () => ({ name: 'Legacy Hero', actif: true }), id: 'legacy-id' }]),
+      of([
+        {
+          data: () => ({
+            name: 'Legacy Hero',
+            actif: true,
+            pv: 50,
+            degats: 50,
+            vitesse: 50,
+          }),
+          id: 'legacy-id',
+        },
+      ]),
     );
 
     const received = await firstValueFrom(service.getHeroes());
 
-    expect(received).toEqual([{ id: 'legacy-id', name: 'Legacy Hero', favori: false }]);
+    expect(received).toEqual([
+      {
+        id: 'legacy-id',
+        name: 'Legacy Hero',
+        favori: false,
+        pv: 50,
+        degats: 50,
+        vitesse: 50,
+      },
+    ]);
+  });
+
+  it('should reject documents with invalid skill values', async () => {
+    collectionSnapshotsMock.mockReturnValueOnce(
+      of([
+        {
+          data: () => ({ name: 'Héros invalide', pv: 0, degats: 50, vitesse: 50 }),
+          id: 'invalid-id',
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getHeroes())).rejects.toThrow(
+      'Le document héros "invalid-id" ne respecte pas le format attendu.',
+    );
   });
 });

@@ -10,17 +10,21 @@ import { DashboardComponent } from './dashboard-component';
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
-  const hero: HeroInterface = { id: 'hero-b2', name: 'Hero B', favori: true };
+  const hero: HeroInterface = {
+    id: 'hero-b2',
+    name: 'Hero B',
+    favori: true,
+    pv: 80,
+    degats: 25,
+    vitesse: 60,
+  };
   const getHeroes = vi.fn(() => of([hero]));
 
   beforeEach(async () => {
     getHeroes.mockClear();
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
-      providers: [
-        provideRouter([]),
-        { provide: HeroService, useValue: { getHeroes } },
-      ],
+      providers: [provideRouter([]), { provide: HeroService, useValue: { getHeroes } }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardComponent);

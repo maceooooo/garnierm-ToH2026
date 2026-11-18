@@ -4,4 +4,7 @@ export interface HeroInterface {
   name: string;
   /** Indique si le héros doit apparaître parmi les favoris. */
   favori: boolean;
+  pv: number;
+  degats: number;
+  vitesse: number;
 }

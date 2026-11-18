@@ -9,7 +9,14 @@ import { HeroesComponent } from './heroes-component';
 describe('HeroesComponent', () => {
   let component: HeroesComponent;
   let fixture: ComponentFixture<HeroesComponent>;
-  const hero: HeroInterface = { id: 'hero-a1', name: 'Hero A', favori: true };
+  const hero: HeroInterface = {
+    id: 'hero-a1',
+    name: 'Hero A',
+    favori: true,
+    pv: 80,
+    degats: 25,
+    vitesse: 60,
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

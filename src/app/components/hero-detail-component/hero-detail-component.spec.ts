@@ -1,12 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import {
-  ActivatedRoute,
-  convertToParamMap,
-  provideRouter,
-  RouterLink,
-} from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter, RouterLink } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { HeroInterface } from '../../data/heroInterface';
@@ -36,7 +31,7 @@ describe('HeroDetailComponent', () => {
             getHero: (id: string) =>
               of<HeroInterface | undefined>(
                 id === 'hero-a1'
-                  ? { id, name: 'Hero A', favori: true }
+                  ? { id, name: 'Hero A', favori: true, pv: 80, degats: 25, vitesse: 60 }
                   : undefined,
               ),
             deleteHero,
@@ -61,12 +56,30 @@ describe('HeroDetailComponent', () => {
     expect(component.hero()?.id).toBe('hero-a1');
   });
 
+  it('should display the hero skills with simple decorative icons', () => {
+    fixture.detectChanges();
+
+    const skills = fixture.nativeElement.querySelector('.hero-stats') as HTMLElement;
+    expect(skills.textContent).toContain('Points de vie (PV) : 80');
+    expect(skills.textContent).toContain('Dégâts : 25');
+    expect(skills.textContent).toContain('Vitesse : 60');
+    expect(skills.querySelectorAll('.stat-icon svg')).toHaveLength(3);
+    expect(skills.querySelectorAll('.stat-icon[aria-hidden="true"]')).toHaveLength(3);
+    expect(skills.parentElement?.querySelector('.hero-info')).not.toBeNull();
+    expect(skills.parentElement?.firstElementChild?.classList.contains('hero-info')).toBe(true);
+    expect(skills.parentElement?.lastElementChild).toBe(skills);
+  });
+
   it('should render accessible edit and delete icon buttons beside the title', () => {
     fixture.detectChanges();
 
     const title = fixture.nativeElement.querySelector('.hero-detail-title') as HTMLElement;
-    const editButton = fixture.nativeElement.querySelector('.hero-edit-action') as HTMLButtonElement;
-    const deleteButton = fixture.nativeElement.querySelector('.hero-delete-action') as HTMLButtonElement;
+    const editButton = fixture.nativeElement.querySelector(
+      '.hero-edit-action',
+    ) as HTMLButtonElement;
+    const deleteButton = fixture.nativeElement.querySelector(
+      '.hero-delete-action',
+    ) as HTMLButtonElement;
     expect(title.textContent).toContain('Détails de Hero A');
     expect(editButton.getAttribute('aria-label')).toBe('Modifier Hero A');
     expect(editButton.textContent).toContain('✎');
@@ -81,7 +94,9 @@ describe('HeroDetailComponent', () => {
   it('should open a styled confirmation without deleting immediately', () => {
     fixture.detectChanges();
 
-    const deleteButton = fixture.nativeElement.querySelector('.hero-delete-action') as HTMLButtonElement;
+    const deleteButton = fixture.nativeElement.querySelector(
+      '.hero-delete-action',
+    ) as HTMLButtonElement;
     deleteButton.click();
     fixture.detectChanges();
 

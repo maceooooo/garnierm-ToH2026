@@ -17,13 +17,20 @@ import { HeroInterface } from '../data/heroInterface';
 import { Observable, concatMap, from, map, of, switchMap, tap, timer } from 'rxjs';
 import { MessageService } from './message-service';
 
+function isValidStat(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 100;
+}
+
 /** Valide le contenu stocké et utilise l'ID Firestore comme identité du héros. */
 function mapHeroDocument(document: DocumentSnapshot): HeroInterface {
   const data = document.data();
   if (
     !data ||
     typeof data['name'] !== 'string' ||
-    (data['favori'] !== undefined && typeof data['favori'] !== 'boolean')
+    (data['favori'] !== undefined && typeof data['favori'] !== 'boolean') ||
+    !isValidStat(data['pv']) ||
+    !isValidStat(data['degats']) ||
+    !isValidStat(data['vitesse'])
   ) {
     throw new Error(`Le document héros "${document.id}" ne respecte pas le format attendu.`);
   }
@@ -34,6 +41,9 @@ function mapHeroDocument(document: DocumentSnapshot): HeroInterface {
     id: document.id,
     name: data['name'],
     favori: typeof data['favori'] === 'boolean' ? data['favori'] : false,
+    pv: data['pv'],
+    degats: data['degats'],
+    vitesse: data['vitesse'],
   };
 }
 
@@ -78,14 +88,11 @@ export class HeroService {
         // Les émissions partielles affichent les héros au fil de l'arrivée, plutôt que d'attendre toute la séquence.
         return from(heroes).pipe(
           concatMap((_, index) =>
-            timer(index === 0 ? 0 : 200).pipe(
-              map(() => heroes.slice(0, index + 1)),
-            ),
+            timer(index === 0 ? 0 : 200).pipe(map(() => heroes.slice(0, index + 1))),
           ),
           tap({
             // Le signalement intervient après la séquence initiale complète, pas à chaque émission partielle.
-            complete: () =>
-              this.messageService.add('HeroService : héros récupérés avec succès'),
+            complete: () => this.messageService.add('HeroService : héros récupérés avec succès'),
           }),
         );
       }),
@@ -102,44 +109,55 @@ export class HeroService {
   getHero(id: string): Observable<HeroInterface | undefined> {
     const heroDocument = doc(this.firestore, 'heroes', id);
     return docSnapshots(heroDocument).pipe(
-      map((document) =>
-        document.exists() ? mapHeroDocument(document) : undefined,
-      ),
+      map((document) => (document.exists() ? mapHeroDocument(document) : undefined)),
     );
   }
 
   /**
-   * Met à jour le nom et le statut favori sans modifier l'identifiant du document.
+   * Met à jour les informations du héros sans modifier l'identifiant du document.
    *
    * @param updatedHero Héros contenant son ID Firestore et les valeurs à enregistrer.
-   * @returns Une promesse résolue après l'écriture, rejetée si Firestore refuse la mise à jour.
+   * @returns Une promesse résolue après l'écriture, rejetée si les données sont invalides ou si Firestore refuse la mise à jour.
    */
   updateHero(updatedHero: HeroInterface): Promise<void> {
+    if (!updatedHero.name.trim() || !this.hasValidStats(updatedHero)) {
+      return Promise.reject(new Error('Le nom et les compétences du héros doivent être valides.'));
+    }
+
     const heroDocument = doc(this.firestore, 'heroes', updatedHero.id);
     // Une mise à jour partielle préserve les autres champs éventuels du document.
     return updateDoc(heroDocument, {
       name: updatedHero.name,
       favori: updatedHero.favori,
+      pv: updatedHero.pv,
+      degats: updatedHero.degats,
+      vitesse: updatedHero.vitesse,
     });
   }
 
   /**
    * Crée un document héros et laisse Firestore générer son identifiant.
    *
-   * @param hero Nom et statut favori du nouveau héros.
+   * @param hero Nom, statut favori et compétences du nouveau héros.
    * @returns L'identifiant Firestore du document créé.
-   * @throws Une erreur si le nom est vide ou si Firestore refuse l'écriture.
+   * @throws Une erreur si le nom ou les compétences sont invalides, ou si Firestore refuse l'écriture.
    */
   async createHero(hero: Omit<HeroInterface, 'id'>): Promise<string> {
     const name = hero.name.trim();
     if (!name) {
       throw new Error('Le nom du héros est obligatoire.');
     }
+    if (!this.hasValidStats(hero)) {
+      throw new Error('Chaque compétence doit être un nombre entier entre 1 et 100.');
+    }
 
     // addDoc génère un ID unique; les données ne contiennent que les champs métier du héros.
     const document = await addDoc(collection(this.firestore, 'heroes'), {
       name,
       favori: hero.favori,
+      pv: hero.pv,
+      degats: hero.degats,
+      vitesse: hero.vitesse,
     });
     return document.id;
   }
@@ -152,5 +170,9 @@ export class HeroService {
    */
   deleteHero(id: string): Promise<void> {
     return deleteDoc(doc(this.firestore, 'heroes', id));
+  }
+
+  private hasValidStats(hero: Pick<HeroInterface, 'pv' | 'degats' | 'vitesse'>): boolean {
+    return [hero.pv, hero.degats, hero.vitesse].every(isValidStat);
   }
 }

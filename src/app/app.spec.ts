@@ -21,12 +21,11 @@ describe('App', () => {
           useValue: {
             getHeroes: () => of([]),
             getHero: (id: string) =>
-              of({ id, name: 'Hero V', favori: true }),
+              of({ id, name: 'Hero V', favori: true, pv: 80, degats: 25, vitesse: 60 }),
           },
         },
       ],
-    })
-      .compileComponents();
+    }).compileComponents();
   });
 
   it('should create the app', () => {

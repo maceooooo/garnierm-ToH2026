@@ -116,16 +116,65 @@
   color: #fff;
 }
 
-div {
+.hero-detail-content {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  align-items: start;
+  gap: 60px;
+  margin-top: 16px;
+}
+
+.hero-info div {
   margin: 8px 0;
 }
 
-div:first-child {
+.hero-info div:first-child {
   /* Le premier bloc sert d'en-tête visuel avant les autres attributs du héros. */
   font-size: 18px;
   color: #369;
 }
 
-div:first-child b {
+.hero-info div:first-child b {
   font-weight: bold;
+}
+
+.hero-stats {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.hero-stats p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.stat-icon {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  border: 1px solid #d5e2f5;
+  border-radius: 50%;
+  background: #fff;
+  color: #2457a6;
+}
+
+.stat-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+@media (max-width: 600px) {
+  .hero-detail-content {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
 }
