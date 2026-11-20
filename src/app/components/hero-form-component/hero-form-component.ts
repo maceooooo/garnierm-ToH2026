@@ -129,6 +129,6 @@ export class HeroFormComponent {
     }
 
     this.messageService.add(`Le héros a été ${this.isEditing() ? 'modifié' : 'créé'} avec succès.`);
-    await this.router.navigateByUrl('/heroes');
+    await this.router.navigate(this.cancelRoute());
   }
 }

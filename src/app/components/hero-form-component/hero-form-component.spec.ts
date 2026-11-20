@@ -21,7 +21,7 @@ describe('HeroFormComponent', () => {
   let updateHero: ReturnType<typeof vi.fn>;
   let getHero: ReturnType<typeof vi.fn>;
   let addMessage: ReturnType<typeof vi.fn>;
-  let navigateByUrl: ReturnType<typeof vi.spyOn>;
+  let navigate: ReturnType<typeof vi.spyOn>;
   let routeParams: BehaviorSubject<ParamMap>;
   let routeQueryParams: BehaviorSubject<ParamMap>;
 
@@ -51,7 +51,7 @@ describe('HeroFormComponent', () => {
       ],
     }).compileComponents();
 
-    navigateByUrl = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     fixture = TestBed.createComponent(HeroFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -89,7 +89,7 @@ describe('HeroFormComponent', () => {
       vitesse: 50,
     });
     expect(addMessage).toHaveBeenCalledWith('Le héros a été créé avec succès.');
-    expect(navigateByUrl).toHaveBeenCalledWith('/heroes');
+    expect(navigate).toHaveBeenCalledWith(['/heroes']);
   });
 
   it('should return to the dashboard when editing was opened there', () => {
@@ -102,6 +102,17 @@ describe('HeroFormComponent', () => {
     expect(cancelRoute.urlTree?.toString()).toBe('/dashboard');
   });
 
+  it('should return to the dashboard after saving an edit opened there', async () => {
+    routeParams.next(convertToParamMap({ id: 'hero-a1' }));
+    routeQueryParams.next(convertToParamMap({ returnTo: 'dashboard' }));
+    await fixture.whenStable();
+
+    await component.saveHero();
+
+    expect(updateHero).toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith(['/dashboard']);
+  });
+
   it('should return to the hero details when editing was opened there', () => {
     routeParams.next(convertToParamMap({ id: 'hero-a1' }));
     routeQueryParams.next(convertToParamMap({ returnTo: 'detail' }));
@@ -111,6 +122,17 @@ describe('HeroFormComponent', () => {
       .query(By.css('.navigation-button'))
       .injector.get(RouterLink);
     expect(cancelRoute.urlTree?.toString()).toBe('/detail/hero-a1');
+  });
+
+  it('should return to the hero details after saving an edit opened there', async () => {
+    routeParams.next(convertToParamMap({ id: 'hero-a1' }));
+    routeQueryParams.next(convertToParamMap({ returnTo: 'detail' }));
+    await fixture.whenStable();
+
+    await component.saveHero();
+
+    expect(updateHero).toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith(['/detail', 'hero-a1']);
   });
 
   it('should use the hero list for an unrecognized return destination', () => {
@@ -153,7 +175,7 @@ describe('HeroFormComponent', () => {
     expect(addMessage).toHaveBeenCalledWith(
       'Impossible de créer le héros. Vérifiez la connexion et les règles Firestore.',
     );
-    expect(navigateByUrl).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('should load an existing hero and update it through the same form', async () => {
