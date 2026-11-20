@@ -14,9 +14,10 @@ describe('DashboardComponent', () => {
     id: 'hero-b2',
     name: 'Hero B',
     favori: true,
-    pv: 80,
-    degats: 25,
-    vitesse: 60,
+    pv: 10,
+    degats: 10,
+    attaque: 10,
+    esquive: 10,
   };
   const getHeroes = vi.fn(() => of([hero]));
 

@@ -19,7 +19,14 @@ import { MessageService } from './message-service';
 import { revealInitialList } from './progressive-list';
 
 function isValidStat(value: unknown): value is number {
-  return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 100;
+  return typeof value === 'number' && Number.isInteger(value) && value >= 1;
+}
+
+function hasValidStats(
+  stats: Pick<HeroInterface, 'pv' | 'degats' | 'attaque' | 'esquive'>,
+): boolean {
+  const values = [stats.pv, stats.degats, stats.attaque, stats.esquive];
+  return values.every(isValidStat) && values.reduce((total, value) => total + value, 0) <= 40;
 }
 
 /** Valide le contenu stocké et utilise l'ID Firestore comme identité du héros. */
@@ -31,7 +38,14 @@ function mapHeroDocument(document: DocumentSnapshot): HeroInterface {
     (data['favori'] !== undefined && typeof data['favori'] !== 'boolean') ||
     !isValidStat(data['pv']) ||
     !isValidStat(data['degats']) ||
-    !isValidStat(data['vitesse'])
+    !isValidStat(data['attaque']) ||
+    !isValidStat(data['esquive']) ||
+    !hasValidStats({
+      pv: data['pv'],
+      degats: data['degats'],
+      attaque: data['attaque'],
+      esquive: data['esquive'],
+    })
   ) {
     throw new Error(`Le document héros "${document.id}" ne respecte pas le format attendu.`);
   }
@@ -44,7 +58,8 @@ function mapHeroDocument(document: DocumentSnapshot): HeroInterface {
     favori: typeof data['favori'] === 'boolean' ? data['favori'] : false,
     pv: data['pv'],
     degats: data['degats'],
-    vitesse: data['vitesse'],
+    attaque: data['attaque'],
+    esquive: data['esquive'],
   };
 }
 
@@ -106,8 +121,12 @@ export class HeroService {
    * @returns Une promesse résolue après l'écriture, rejetée si les données sont invalides ou si Firestore refuse la mise à jour.
    */
   updateHero(updatedHero: HeroInterface): Promise<void> {
-    if (!updatedHero.name.trim() || !this.hasValidStats(updatedHero)) {
-      return Promise.reject(new Error('Le nom et les compétences du héros doivent être valides.'));
+    if (!updatedHero.name.trim() || !hasValidStats(updatedHero)) {
+      return Promise.reject(
+        new Error(
+          'Le nom doit être renseigné et les 4 caractéristiques totaliser au maximum 40 points.',
+        ),
+      );
     }
 
     const heroDocument = doc(this.firestore, 'heroes', updatedHero.id);
@@ -117,7 +136,8 @@ export class HeroService {
       favori: updatedHero.favori,
       pv: updatedHero.pv,
       degats: updatedHero.degats,
-      vitesse: updatedHero.vitesse,
+      attaque: updatedHero.attaque,
+      esquive: updatedHero.esquive,
     });
   }
 
@@ -133,8 +153,10 @@ export class HeroService {
     if (!name) {
       throw new Error('Le nom du héros est obligatoire.');
     }
-    if (!this.hasValidStats(hero)) {
-      throw new Error('Chaque compétence doit être un nombre entier entre 1 et 100.');
+    if (!hasValidStats(hero)) {
+      throw new Error(
+        'Chaque caractéristique doit être au moins à 1 et leur somme ne peut pas dépasser 40.',
+      );
     }
 
     // addDoc génère un ID unique; les données ne contiennent que les champs métier du héros.
@@ -143,7 +165,8 @@ export class HeroService {
       favori: hero.favori,
       pv: hero.pv,
       degats: hero.degats,
-      vitesse: hero.vitesse,
+      attaque: hero.attaque,
+      esquive: hero.esquive,
     });
     return document.id;
   }
@@ -156,9 +179,5 @@ export class HeroService {
    */
   deleteHero(id: string): Promise<void> {
     return deleteDoc(doc(this.firestore, 'heroes', id));
-  }
-
-  private hasValidStats(hero: Pick<HeroInterface, 'pv' | 'degats' | 'vitesse'>): boolean {
-    return [hero.pv, hero.degats, hero.vitesse].every(isValidStat);
   }
 }

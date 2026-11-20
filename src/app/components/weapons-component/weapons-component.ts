@@ -48,7 +48,7 @@ export class WeaponsComponent {
 
   private getLoadErrorMessage(error: unknown): string {
     if (error instanceof InvalidWeaponDocumentError) {
-      return `${error.message} Vérifiez name, les bonus bonusPv, bonusDegats et bonusVitesse (entiers de -50 à 50), ainsi que equippedHeroIds (facultatif, liste d’identifiants de héros).`;
+      return `${error.message} Vérifiez name, les bonus bonusPv, bonusDegats, bonusAttaque et bonusEsquive (entiers de -5 à 5, somme égale à 0), ainsi que equippedHeroIds (facultatif, liste d’identifiants de héros).`;
     }
 
     const code = this.getErrorCode(error);

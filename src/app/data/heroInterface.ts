@@ -6,5 +6,6 @@ export interface HeroInterface {
   favori: boolean;
   pv: number;
   degats: number;
-  vitesse: number;
+  attaque: number;
+  esquive: number;
 }

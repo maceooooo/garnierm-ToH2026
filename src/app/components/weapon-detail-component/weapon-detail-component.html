@@ -41,7 +41,8 @@
     <section class="entity-attributes weapon-bonuses" aria-label="Bonus de l’arme">
       <p><app-stat-icon kind="pv" /> Bonus de PV : {{ selectedWeapon.bonusPv }}</p>
       <p><app-stat-icon kind="degats" /> Bonus de dégâts : {{ selectedWeapon.bonusDegats }}</p>
-      <p><app-stat-icon kind="vitesse" /> Bonus de vitesse : {{ selectedWeapon.bonusVitesse }}</p>
+      <p><app-stat-icon kind="attaque" /> Bonus d’attaque : {{ selectedWeapon.bonusAttaque }}</p>
+      <p><app-stat-icon kind="esquive" /> Bonus d’esquive : {{ selectedWeapon.bonusEsquive }}</p>
     </section>
   </div>
   @if (isDeleteConfirmationOpen()) {

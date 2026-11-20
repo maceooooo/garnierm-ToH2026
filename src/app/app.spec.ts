@@ -25,7 +25,15 @@ describe('App', () => {
           useValue: {
             getHeroes: () => of([]),
             getHero: (id: string) =>
-              of({ id, name: 'Hero V', favori: true, pv: 80, degats: 25, vitesse: 60 }),
+              of({
+                id,
+                name: 'Hero V',
+                favori: true,
+                pv: 10,
+                degats: 10,
+                attaque: 10,
+                esquive: 10,
+              }),
           },
         },
         {
@@ -37,8 +45,9 @@ describe('App', () => {
                 id,
                 name: 'Épée',
                 bonusPv: 0,
-                bonusDegats: 25,
-                bonusVitesse: -10,
+                bonusDegats: 2,
+                bonusAttaque: -1,
+                bonusEsquive: -1,
                 equippedHeroIds: [],
               }),
             createWeapon: () => Promise.resolve('weapon-a1'),

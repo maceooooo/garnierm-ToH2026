@@ -33,8 +33,8 @@ vi.mock('@angular/fire/firestore', () => ({
 describe('HeroService', () => {
   let service: HeroService;
   const mockHeroes: HeroInterface[] = [
-    { id: 'hero-a1', name: 'Hero A', favori: true, pv: 80, degats: 25, vitesse: 60 },
-    { id: 'hero-b2', name: 'Hero B', favori: false, pv: 50, degats: 40, vitesse: 70 },
+    { id: 'hero-a1', name: 'Hero A', favori: true, pv: 10, degats: 10, attaque: 10, esquive: 10 },
+    { id: 'hero-b2', name: 'Hero B', favori: false, pv: 10, degats: 10, attaque: 10, esquive: 10 },
   ];
 
   afterEach(() => {
@@ -50,7 +50,8 @@ describe('HeroService', () => {
             favori: hero.favori,
             pv: hero.pv,
             degats: hero.degats,
-            vitesse: hero.vitesse,
+            attaque: hero.attaque,
+            esquive: hero.esquive,
           }),
           id: hero.id,
         })),
@@ -63,7 +64,8 @@ describe('HeroService', () => {
           favori: mockHeroes[0].favori,
           pv: mockHeroes[0].pv,
           degats: mockHeroes[0].degats,
-          vitesse: mockHeroes[0].vitesse,
+          attaque: mockHeroes[0].attaque,
+          esquive: mockHeroes[0].esquive,
         }),
         exists: () => true,
         id: mockHeroes[0].id,
@@ -96,19 +98,27 @@ describe('HeroService', () => {
     expect(updateDocMock).toHaveBeenCalledWith(expect.anything(), {
       name: 'Hero modifié',
       favori: false,
-      pv: 80,
-      degats: 25,
-      vitesse: 60,
+      pv: 10,
+      degats: 10,
+      attaque: 10,
+      esquive: 10,
     });
   });
 
-  it('should reject invalid statistics before updating Firestore', async () => {
+  it('should reject statistics below one before updating Firestore', async () => {
     updateDocMock.mockClear();
 
-    await expect(service.updateHero({ ...mockHeroes[0], vitesse: 0 })).rejects.toThrow(
-      'Le nom et les compétences du héros doivent être valides.',
+    await expect(service.updateHero({ ...mockHeroes[0], esquive: 0 })).rejects.toThrow(
+      'Le nom doit être renseigné et les 4 caractéristiques totaliser au maximum 40 points.',
     );
 
+    expect(updateDocMock).not.toHaveBeenCalled();
+  });
+
+  it('should reject a total allocation above 40 before updating Firestore', async () => {
+    await expect(service.updateHero({ ...mockHeroes[0], pv: 11 })).rejects.toThrow(
+      'Le nom doit être renseigné et les 4 caractéristiques totaliser au maximum 40 points.',
+    );
     expect(updateDocMock).not.toHaveBeenCalled();
   });
 
@@ -117,19 +127,34 @@ describe('HeroService', () => {
       service.createHero({
         name: '  Nouveau héros  ',
         favori: true,
-        pv: 100,
-        degats: 1,
-        vitesse: 50,
+        pv: 15,
+        degats: 10,
+        attaque: 10,
+        esquive: 5,
       }),
     ).resolves.toBe('hero-new1');
 
     expect(addDocMock).toHaveBeenCalledWith(expect.anything(), {
       name: 'Nouveau héros',
       favori: true,
-      pv: 100,
-      degats: 1,
-      vitesse: 50,
+      pv: 15,
+      degats: 10,
+      attaque: 10,
+      esquive: 5,
     });
+  });
+
+  it('should allow a valid allocation below 40 points', async () => {
+    await expect(
+      service.createHero({
+        name: 'Héros équilibré',
+        favori: false,
+        pv: 1,
+        degats: 1,
+        attaque: 1,
+        esquive: 1,
+      }),
+    ).resolves.toBe('hero-new1');
   });
 
   it('should reject a hero with an empty name without writing to Firestore', async () => {
@@ -137,24 +162,28 @@ describe('HeroService', () => {
       service.createHero({
         name: '   ',
         favori: true,
-        pv: 50,
-        degats: 50,
-        vitesse: 50,
+        pv: 10,
+        degats: 10,
+        attaque: 10,
+        esquive: 10,
       }),
     ).rejects.toThrow('Le nom du héros est obligatoire.');
     expect(addDocMock).not.toHaveBeenCalled();
   });
 
-  it('should reject statistics outside the allowed range without writing to Firestore', async () => {
+  it('should reject a total allocation above 40 without writing to Firestore', async () => {
     await expect(
       service.createHero({
         name: 'Héros invalide',
         favori: false,
-        pv: 101,
-        degats: 50,
-        vitesse: 50,
+        pv: 11,
+        degats: 10,
+        attaque: 10,
+        esquive: 10,
       }),
-    ).rejects.toThrow('Chaque compétence doit être un nombre entier entre 1 et 100.');
+    ).rejects.toThrow(
+      'Chaque caractéristique doit être au moins à 1 et leur somme ne peut pas dépasser 40.',
+    );
     expect(addDocMock).not.toHaveBeenCalled();
   });
 
@@ -198,9 +227,10 @@ describe('HeroService', () => {
           data: () => ({
             name: 'Legacy Hero',
             actif: true,
-            pv: 50,
-            degats: 50,
-            vitesse: 50,
+            pv: 10,
+            degats: 10,
+            attaque: 10,
+            esquive: 10,
           }),
           id: 'legacy-id',
         },
@@ -214,9 +244,10 @@ describe('HeroService', () => {
         id: 'legacy-id',
         name: 'Legacy Hero',
         favori: false,
-        pv: 50,
-        degats: 50,
-        vitesse: 50,
+        pv: 10,
+        degats: 10,
+        attaque: 10,
+        esquive: 10,
       },
     ]);
   });
@@ -225,7 +256,7 @@ describe('HeroService', () => {
     collectionSnapshotsMock.mockReturnValueOnce(
       of([
         {
-          data: () => ({ name: 'Héros invalide', pv: 0, degats: 50, vitesse: 50 }),
+          data: () => ({ name: 'Héros invalide', pv: 0, degats: 10, attaque: 10, esquive: 10 }),
           id: 'invalid-id',
         },
       ]),

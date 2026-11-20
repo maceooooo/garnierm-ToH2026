@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 
-export type StatIconKind = 'pv' | 'degats' | 'vitesse';
+export type StatIconKind = 'pv' | 'degats' | 'attaque' | 'esquive';
 
 @Component({
   host: { 'aria-hidden': 'true' },

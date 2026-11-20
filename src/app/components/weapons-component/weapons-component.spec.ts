@@ -17,8 +17,9 @@ describe('WeaponsComponent', () => {
     id: 'weapon-a1',
     name: 'Épée',
     bonusPv: 0,
-    bonusDegats: 25,
-    bonusVitesse: -10,
+    bonusDegats: 2,
+    bonusAttaque: -1,
+    bonusEsquive: -1,
     equippedHeroIds: [],
   };
 
@@ -36,7 +37,15 @@ describe('WeaponsComponent', () => {
           useValue: {
             getHeroes: () =>
               of([
-                { id: 'hero-a1', name: 'Archer', favori: true, pv: 80, degats: 25, vitesse: 60 },
+                {
+                  id: 'hero-a1',
+                  name: 'Archer',
+                  favori: true,
+                  pv: 10,
+                  degats: 10,
+                  attaque: 10,
+                  esquive: 10,
+                },
               ]),
           },
         },
@@ -105,7 +114,9 @@ describe('WeaponsComponent', () => {
       '.weapon-load-error',
     ) as HTMLElement;
     expect(errorMessage.textContent).toContain('weapon-bad1');
-    expect(errorMessage.textContent).toContain('bonusPv, bonusDegats et bonusVitesse');
+    expect(errorMessage.textContent).toContain(
+      'bonusPv, bonusDegats, bonusAttaque et bonusEsquive (entiers de -5 à 5, somme égale à 0)',
+    );
     expect(errorFixture.componentInstance.weapons()).toEqual([]);
   });
 });

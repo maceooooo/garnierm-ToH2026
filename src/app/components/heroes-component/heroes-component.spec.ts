@@ -13,9 +13,10 @@ describe('HeroesComponent', () => {
     id: 'hero-a1',
     name: 'Hero A',
     favori: true,
-    pv: 80,
-    degats: 25,
-    vitesse: 60,
+    pv: 10,
+    degats: 10,
+    attaque: 10,
+    esquive: 10,
   };
 
   beforeEach(async () => {

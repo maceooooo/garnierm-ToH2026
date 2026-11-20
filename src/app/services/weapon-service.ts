@@ -22,7 +22,11 @@ import { revealInitialList } from './progressive-list';
 type NewWeapon = Omit<WeaponInterface, 'id' | 'equippedHeroIds'>;
 
 function isValidBonus(value: unknown): value is number {
-  return typeof value === 'number' && Number.isInteger(value) && value >= -50 && value <= 50;
+  return typeof value === 'number' && Number.isInteger(value) && value >= -5 && value <= 5;
+}
+
+function isValidBonusOrMissing(value: unknown): value is number | undefined {
+  return value === undefined || isValidBonus(value);
 }
 
 function isStringArray(value: unknown): value is string[] {
@@ -39,13 +43,21 @@ export class InvalidWeaponDocumentError extends Error {
 function mapWeaponDocument(document: DocumentSnapshot): WeaponInterface {
   const data = document.data();
   const equippedHeroIds = data?.['equippedHeroIds'];
+  const bonuses = {
+    bonusPv: data?.['bonusPv'],
+    bonusDegats: data?.['bonusDegats'],
+    bonusAttaque: data?.['bonusAttaque'] ?? 0,
+    bonusEsquive: data?.['bonusEsquive'] ?? 0,
+  };
   if (
     !data ||
     typeof data['name'] !== 'string' ||
     !data['name'].trim() ||
     !isValidBonus(data['bonusPv']) ||
     !isValidBonus(data['bonusDegats']) ||
-    !isValidBonus(data['bonusVitesse']) ||
+    !isValidBonusOrMissing(data['bonusAttaque']) ||
+    !isValidBonusOrMissing(data['bonusEsquive']) ||
+    !isValidWeaponBonuses(bonuses) ||
     (equippedHeroIds !== undefined && !isStringArray(equippedHeroIds))
   ) {
     throw new InvalidWeaponDocumentError(document.id);
@@ -54,9 +66,7 @@ function mapWeaponDocument(document: DocumentSnapshot): WeaponInterface {
   return {
     id: document.id,
     name: data['name'],
-    bonusPv: data['bonusPv'],
-    bonusDegats: data['bonusDegats'],
-    bonusVitesse: data['bonusVitesse'],
+    ...bonuses,
     equippedHeroIds: equippedHeroIds === undefined ? [] : equippedHeroIds,
   };
 }
@@ -112,14 +122,17 @@ export class WeaponService {
       throw new Error('Le nom de l’arme est obligatoire.');
     }
     if (!this.hasValidBonuses(weapon)) {
-      throw new Error('Chaque bonus doit être un nombre entier compris entre -50 et 50.');
+      throw new Error(
+        'Chaque bonus doit être un entier entre -5 et 5 et la somme des 4 bonus doit être égale à 0.',
+      );
     }
 
     const createdDocument = await addDoc(collection(this.firestore, 'armes'), {
       name,
       bonusPv: weapon.bonusPv,
       bonusDegats: weapon.bonusDegats,
-      bonusVitesse: weapon.bonusVitesse,
+      bonusAttaque: weapon.bonusAttaque,
+      bonusEsquive: weapon.bonusEsquive,
       equippedHeroIds: [],
     });
     return createdDocument.id;
@@ -140,7 +153,8 @@ export class WeaponService {
       name: weapon.name.trim(),
       bonusPv: weapon.bonusPv,
       bonusDegats: weapon.bonusDegats,
-      bonusVitesse: weapon.bonusVitesse,
+      bonusAttaque: weapon.bonusAttaque,
+      bonusEsquive: weapon.bonusEsquive,
     });
   }
 
@@ -189,8 +203,15 @@ export class WeaponService {
   }
 
   private hasValidBonuses(
-    weapon: Pick<WeaponInterface, 'bonusPv' | 'bonusDegats' | 'bonusVitesse'>,
+    weapon: Pick<WeaponInterface, 'bonusPv' | 'bonusDegats' | 'bonusAttaque' | 'bonusEsquive'>,
   ): boolean {
-    return [weapon.bonusPv, weapon.bonusDegats, weapon.bonusVitesse].every(isValidBonus);
+    return isValidWeaponBonuses(weapon);
   }
+}
+
+function isValidWeaponBonuses(
+  weapon: Pick<WeaponInterface, 'bonusPv' | 'bonusDegats' | 'bonusAttaque' | 'bonusEsquive'>,
+): boolean {
+  const bonuses = [weapon.bonusPv, weapon.bonusDegats, weapon.bonusAttaque, weapon.bonusEsquive];
+  return bonuses.every(isValidBonus) && bonuses.reduce((total, bonus) => total + bonus, 0) === 0;
 }

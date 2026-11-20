@@ -32,8 +32,9 @@ describe('WeaponFormComponent', () => {
         id: 'weapon-a1',
         name: 'Épée',
         bonusPv: 0,
-        bonusDegats: 25,
-        bonusVitesse: -10,
+        bonusDegats: -2,
+        bonusAttaque: 1,
+        bonusEsquive: 1,
       }),
     );
     addMessage = vi.fn();
@@ -60,25 +61,50 @@ describe('WeaponFormComponent', () => {
       name: '',
       bonusPv: 0,
       bonusDegats: 0,
-      bonusVitesse: 0,
+      bonusAttaque: 0,
+      bonusEsquive: 0,
     });
+    expect(component.remainingPoints()).toBe(0);
 
     component.weaponModel.set({
       name: '  Épée  ',
       bonusPv: 0,
-      bonusDegats: 25,
-      bonusVitesse: -10,
+      bonusDegats: -2,
+      bonusAttaque: 1,
+      bonusEsquive: 1,
     });
     await component.saveWeapon();
 
     expect(createWeapon).toHaveBeenCalledWith({
       name: 'Épée',
       bonusPv: 0,
-      bonusDegats: 25,
-      bonusVitesse: -10,
+      bonusDegats: -2,
+      bonusAttaque: 1,
+      bonusEsquive: 1,
     });
     expect(navigateByUrl).toHaveBeenCalledWith('/weapons');
     expect(addMessage).toHaveBeenCalledWith('L’arme a été créée avec succès.');
+  });
+
+  it('should show the remaining balance and enable saving only when the bonuses sum to zero', () => {
+    component.weaponModel.update((weapon) => ({ ...weapon, bonusPv: 2 }));
+    fixture.detectChanges();
+
+    expect(component.remainingPoints()).toBe(-2);
+    expect(fixture.nativeElement.textContent.replace(/\s+/g, ' ')).toContain(
+      'Solde à répartir pour atteindre 0 : -2',
+    );
+    expect(fixture.nativeElement.textContent).toContain('retirez 2 point(s)');
+    const saveButton = fixture.nativeElement.querySelector(
+      'button[type="submit"]',
+    ) as HTMLButtonElement;
+    expect(saveButton.disabled).toBe(true);
+
+    component.weaponModel.update((weapon) => ({ ...weapon, bonusDegats: -2 }));
+    fixture.detectChanges();
+
+    expect(component.remainingPoints()).toBe(0);
+    expect(saveButton.disabled).toBe(false);
   });
 
   it('should load an existing weapon and update it with the same form', async () => {
@@ -87,8 +113,9 @@ describe('WeaponFormComponent', () => {
     component.weaponModel.set({
       name: 'Hache',
       bonusPv: -5,
-      bonusDegats: 40,
-      bonusVitesse: 0,
+      bonusDegats: 3,
+      bonusAttaque: 1,
+      bonusEsquive: 1,
     });
     await component.saveWeapon();
 
@@ -97,8 +124,9 @@ describe('WeaponFormComponent', () => {
       id: 'weapon-a1',
       name: 'Hache',
       bonusPv: -5,
-      bonusDegats: 40,
-      bonusVitesse: 0,
+      bonusDegats: 3,
+      bonusAttaque: 1,
+      bonusEsquive: 1,
     });
     expect(createWeapon).not.toHaveBeenCalled();
   });
@@ -109,30 +137,48 @@ describe('WeaponFormComponent', () => {
     expect(fixture.nativeElement.querySelector('.entity-form-shell')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.entity-form')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.entity-form-stats')).not.toBeNull();
-    expect(fixture.nativeElement.querySelectorAll('input[type="number"]')).toHaveLength(3);
-    expect(fixture.nativeElement.querySelectorAll('app-stat-icon')).toHaveLength(3);
+    expect(fixture.nativeElement.querySelectorAll('input[type="number"]')).toHaveLength(4);
+    expect(fixture.nativeElement.querySelectorAll('app-stat-icon')).toHaveLength(4);
     const cancelLink = fixture.debugElement
       .query(By.css('.navigation-button'))
       .injector.get(RouterLink);
     expect(cancelLink.urlTree?.toString()).toBe('/weapons');
 
-    component.weaponModel.update((weapon) => ({ ...weapon, bonusPv: -51 }));
+    component.weaponModel.update((weapon) => ({ ...weapon, bonusPv: -6 }));
     fixture.detectChanges();
-    expect(component.weaponForm.bonusPv().errors()[0]?.message).toContain('-50 et 50');
+    expect(component.weaponForm.bonusPv().errors()[0]?.message).toContain('-5 et 5');
   });
 
   it('should reject bonuses outside the allowed range without calling the service', async () => {
     component.weaponModel.set({
       name: 'Arme invalide',
       bonusPv: 0,
-      bonusDegats: 51,
-      bonusVitesse: 0,
+      bonusDegats: 6,
+      bonusAttaque: 0,
+      bonusEsquive: 0,
     });
     await component.saveWeapon();
 
     expect(createWeapon).not.toHaveBeenCalled();
     expect(addMessage).toHaveBeenCalledWith(
-      'Chaque bonus doit être un nombre entier compris entre -50 et 50.',
+      'Chaque bonus doit être un entier entre -5 et 5 et la somme des 4 bonus doit être égale à 0.',
+    );
+  });
+
+  it('should reject an unbalanced allocation even when all bonuses are in range', async () => {
+    component.weaponModel.set({
+      name: 'Arme déséquilibrée',
+      bonusPv: 1,
+      bonusDegats: 0,
+      bonusAttaque: 0,
+      bonusEsquive: 0,
+    });
+
+    await component.saveWeapon();
+
+    expect(createWeapon).not.toHaveBeenCalled();
+    expect(addMessage).toHaveBeenCalledWith(
+      'Chaque bonus doit être un entier entre -5 et 5 et la somme des 4 bonus doit être égale à 0.',
     );
   });
 
@@ -143,8 +189,9 @@ describe('WeaponFormComponent', () => {
           id: 'weapon-a1',
           name: 'Épée',
           bonusPv: 0,
-          bonusDegats: 25,
-          bonusVitesse: -10,
+          bonusDegats: -2,
+          bonusAttaque: 1,
+          bonusEsquive: 1,
         });
       }),
     );

@@ -25,8 +25,9 @@ describe('WeaponDetailComponent', () => {
     id: 'weapon-a1',
     name: 'Épée',
     bonusPv: 0,
-    bonusDegats: 25,
-    bonusVitesse: -10,
+    bonusDegats: 2,
+    bonusAttaque: -1,
+    bonusEsquive: -1,
     equippedHeroIds: [],
   };
 
@@ -56,7 +57,15 @@ describe('WeaponDetailComponent', () => {
           useValue: {
             getHeroes: () =>
               of([
-                { id: 'hero-a1', name: 'Archer', favori: true, pv: 80, degats: 25, vitesse: 60 },
+                {
+                  id: 'hero-a1',
+                  name: 'Archer',
+                  favori: true,
+                  pv: 10,
+                  degats: 10,
+                  attaque: 10,
+                  esquive: 10,
+                },
               ]),
           },
         },
@@ -78,9 +87,10 @@ describe('WeaponDetailComponent', () => {
     expect(bonuses.parentElement?.classList.contains('entity-detail-content')).toBe(true);
     expect(fixture.nativeElement.querySelector('.weapon-back-link')).toBeNull();
     expect(bonuses.textContent).toContain('Bonus de PV : 0');
-    expect(bonuses.textContent).toContain('Bonus de dégâts : 25');
-    expect(bonuses.textContent).toContain('Bonus de vitesse : -10');
-    expect(bonuses.querySelectorAll('app-stat-icon')).toHaveLength(3);
+    expect(bonuses.textContent).toContain('Bonus de dégâts : 2');
+    expect(bonuses.textContent).toContain('Bonus d’attaque : -1');
+    expect(bonuses.textContent).toContain('Bonus d’esquive : -1');
+    expect(bonuses.querySelectorAll('app-stat-icon')).toHaveLength(4);
   });
 
   it('should link to edit and share the delete confirmation dialog', () => {

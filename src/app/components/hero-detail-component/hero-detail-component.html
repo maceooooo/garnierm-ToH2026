@@ -76,18 +76,37 @@
         class="hero-stat-row"
         tabindex="0"
         [attr.aria-label]="
-          'Vitesse : ' +
-          selectedHero.stats.vitesse.total +
+          'Attaque : ' +
+          selectedHero.stats.attaque.total +
           ', détail ' +
-          selectedHero.stats.vitesse.breakdown
+          selectedHero.stats.attaque.breakdown
         "
       >
-        <app-stat-icon class="stat-icon" kind="vitesse" />
-        Vitesse :
+        <app-stat-icon class="stat-icon" kind="attaque" />
+        Attaque :
         <span class="hero-stat-value">
-          <span class="hero-stat-total">{{ selectedHero.stats.vitesse.total }}</span>
+          <span class="hero-stat-total">{{ selectedHero.stats.attaque.total }}</span>
           <span class="hero-stat-breakdown" aria-hidden="true">
-            {{ selectedHero.stats.vitesse.breakdown }}
+            {{ selectedHero.stats.attaque.breakdown }}
+          </span>
+        </span>
+      </p>
+      <p
+        class="hero-stat-row"
+        tabindex="0"
+        [attr.aria-label]="
+          'Esquive : ' +
+          selectedHero.stats.esquive.total +
+          ', détail ' +
+          selectedHero.stats.esquive.breakdown
+        "
+      >
+        <app-stat-icon class="stat-icon" kind="esquive" />
+        Esquive :
+        <span class="hero-stat-value">
+          <span class="hero-stat-total">{{ selectedHero.stats.esquive.total }}</span>
+          <span class="hero-stat-breakdown" aria-hidden="true">
+            {{ selectedHero.stats.esquive.breakdown }}
           </span>
         </span>
       </p>

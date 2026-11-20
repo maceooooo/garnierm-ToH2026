@@ -39,7 +39,15 @@ describe('HeroDetailComponent', () => {
             getHero: (id: string) =>
               of<HeroInterface | undefined>(
                 id === 'hero-a1'
-                  ? { id, name: 'Hero A', favori: true, pv: 80, degats: 25, vitesse: 60 }
+                  ? {
+                      id,
+                      name: 'Hero A',
+                      favori: true,
+                      pv: 10,
+                      degats: 10,
+                      attaque: 10,
+                      esquive: 10,
+                    }
                   : undefined,
               ),
             deleteHero,
@@ -70,16 +78,17 @@ describe('HeroDetailComponent', () => {
 
     const skills = fixture.nativeElement.querySelector('.hero-stats') as HTMLElement;
     const skillText = skills.textContent?.replace(/\s+/g, ' ') ?? '';
-    expect(skillText).toContain('Points de vie (PV) : 80');
-    expect(skillText).toContain('Dégâts : 25');
-    expect(skillText).toContain('Vitesse : 60');
-    expect(skills.querySelector('.hero-stat-total')?.textContent?.trim()).toBe('80');
-    expect(skills.querySelector('.hero-stat-breakdown')?.textContent?.trim()).toBe('80');
+    expect(skillText).toContain('Points de vie (PV) : 10');
+    expect(skillText).toContain('Dégâts : 10');
+    expect(skillText).toContain('Attaque : 10');
+    expect(skillText).toContain('Esquive : 10');
+    expect(skills.querySelector('.hero-stat-total')?.textContent?.trim()).toBe('10');
+    expect(skills.querySelector('.hero-stat-breakdown')?.textContent?.trim()).toBe('10');
     expect(skills.querySelector('.hero-stat-breakdown')?.getAttribute('aria-hidden')).toBe('true');
-    expect(skills.querySelectorAll('p[tabindex="0"]')).toHaveLength(3);
+    expect(skills.querySelectorAll('p[tabindex="0"]')).toHaveLength(4);
     expect(skills.querySelectorAll('p[data-tooltip]')).toHaveLength(0);
-    expect(skills.querySelectorAll('.stat-icon svg')).toHaveLength(3);
-    expect(skills.querySelectorAll('.stat-icon[aria-hidden="true"]')).toHaveLength(3);
+    expect(skills.querySelectorAll('.stat-icon svg')).toHaveLength(4);
+    expect(skills.querySelectorAll('.stat-icon[aria-hidden="true"]')).toHaveLength(4);
     expect(skills.parentElement?.querySelector('.hero-info')).not.toBeNull();
     expect(skills.parentElement?.firstElementChild?.classList.contains('hero-info')).toBe(true);
     expect(skills.parentElement?.lastElementChild).toBe(skills);
@@ -92,33 +101,37 @@ describe('HeroDetailComponent', () => {
       {
         id: 'weapon-a1',
         name: 'Épée',
-        bonusPv: 10,
-        bonusDegats: 5,
-        bonusVitesse: -2,
+        bonusPv: 2,
+        bonusDegats: 1,
+        bonusAttaque: -2,
+        bonusEsquive: -1,
         equippedHeroIds: ['hero-a1'],
       },
       {
         id: 'weapon-b2',
         name: 'Bouclier',
-        bonusPv: 7,
-        bonusDegats: 0,
-        bonusVitesse: 3,
+        bonusPv: -1,
+        bonusDegats: 1,
+        bonusAttaque: 2,
+        bonusEsquive: -2,
         equippedHeroIds: ['hero-a1', 'hero-other'],
       },
       {
         id: 'weapon-c3',
         name: 'Autre arme',
-        bonusPv: 100,
-        bonusDegats: 100,
-        bonusVitesse: 100,
+        bonusPv: 5,
+        bonusDegats: -5,
+        bonusAttaque: 2,
+        bonusEsquive: -2,
         equippedHeroIds: ['hero-other'],
       },
     ]);
 
     expect(component.heroWithBonuses()?.stats).toEqual({
-      pv: { total: 97, breakdown: '80 + 10 + 7' },
-      degats: { total: 30, breakdown: '25 + 5' },
-      vitesse: { total: 61, breakdown: '60 − 2 + 3' },
+      pv: { total: 11, breakdown: '10 + 2 − 1' },
+      degats: { total: 12, breakdown: '10 + 1 + 1' },
+      attaque: { total: 10, breakdown: '10 − 2 + 2' },
+      esquive: { total: 7, breakdown: '10 − 1 − 2' },
     });
   });
 
@@ -127,9 +140,10 @@ describe('HeroDetailComponent', () => {
       {
         id: 'weapon-a1',
         name: 'Épée',
-        bonusPv: 10,
-        bonusDegats: -5,
-        bonusVitesse: 0,
+        bonusPv: 2,
+        bonusDegats: -1,
+        bonusAttaque: -1,
+        bonusEsquive: 0,
         equippedHeroIds: ['hero-a1'],
       },
     ]);
@@ -149,10 +163,10 @@ describe('HeroDetailComponent', () => {
     const statRows = fixture.nativeElement.querySelectorAll(
       '.hero-stats p',
     ) as NodeListOf<HTMLParagraphElement>;
-    expect(statRows[0].querySelector('.hero-stat-total')?.textContent?.trim()).toBe('90');
-    expect(statRows[0].querySelector('.hero-stat-breakdown')?.textContent?.trim()).toBe('80 + 10');
-    expect(statRows[1].querySelector('.hero-stat-total')?.textContent?.trim()).toBe('20');
-    expect(statRows[1].querySelector('.hero-stat-breakdown')?.textContent?.trim()).toBe('25 − 5');
+    expect(statRows[0].querySelector('.hero-stat-total')?.textContent?.trim()).toBe('12');
+    expect(statRows[0].querySelector('.hero-stat-breakdown')?.textContent?.trim()).toBe('10 + 2');
+    expect(statRows[1].querySelector('.hero-stat-total')?.textContent?.trim()).toBe('9');
+    expect(statRows[1].querySelector('.hero-stat-breakdown')?.textContent?.trim()).toBe('10 − 1');
   });
 
   it('should explain when the hero has no equipped weapons', () => {
@@ -168,9 +182,10 @@ describe('HeroDetailComponent', () => {
       {
         id: 'weapon-a1',
         name: 'Épée',
-        bonusPv: 10,
+        bonusPv: 2,
         bonusDegats: 0,
-        bonusVitesse: 0,
+        bonusAttaque: -1,
+        bonusEsquive: -1,
         equippedHeroIds: ['hero-a1'],
       },
     ]);
@@ -188,9 +203,10 @@ describe('HeroDetailComponent', () => {
     const weapon: WeaponInterface = {
       id: 'weapon-a1',
       name: 'Épée',
-      bonusPv: 10,
+      bonusPv: 2,
       bonusDegats: 0,
-      bonusVitesse: 0,
+      bonusAttaque: -1,
+      bonusEsquive: -1,
       equippedHeroIds: ['hero-a1'],
     };
     component.openDetachConfirmation(weapon);
@@ -205,9 +221,10 @@ describe('HeroDetailComponent', () => {
     const weapon: WeaponInterface = {
       id: 'weapon-a1',
       name: 'Épée',
-      bonusPv: 10,
+      bonusPv: 2,
       bonusDegats: 0,
-      bonusVitesse: 0,
+      bonusAttaque: -1,
+      bonusEsquive: -1,
       equippedHeroIds: ['hero-a1'],
     };
     component.openDetachConfirmation(weapon);
@@ -225,9 +242,10 @@ describe('HeroDetailComponent', () => {
     const weapon: WeaponInterface = {
       id: 'weapon-a1',
       name: 'Épée',
-      bonusPv: 10,
+      bonusPv: 2,
       bonusDegats: 0,
-      bonusVitesse: 0,
+      bonusAttaque: -1,
+      bonusEsquive: -1,
       equippedHeroIds: ['hero-a1'],
     };
     component.openDetachConfirmation(weapon);

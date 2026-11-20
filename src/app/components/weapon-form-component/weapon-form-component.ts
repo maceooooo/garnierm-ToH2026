@@ -24,17 +24,38 @@ export class WeaponFormComponent {
   isEditing = computed(() => this.weaponId() !== null);
   isLoading = signal(false);
   isSaving = signal(false);
-  weaponModel = signal({ name: '', bonusPv: 0, bonusDegats: 0, bonusVitesse: 0 });
+  weaponModel = signal({
+    name: '',
+    bonusPv: 0,
+    bonusDegats: 0,
+    bonusAttaque: 0,
+    bonusEsquive: 0,
+  });
+  remainingPoints = computed(() => {
+    const { bonusPv, bonusDegats, bonusAttaque, bonusEsquive } = this.weaponModel();
+    const balance = bonusPv + bonusDegats + bonusAttaque + bonusEsquive;
+    return balance === 0 ? 0 : -balance;
+  });
+  hasValidBonuses = computed(() => {
+    const { bonusPv, bonusDegats, bonusAttaque, bonusEsquive } = this.weaponModel();
+    const bonuses = [bonusPv, bonusDegats, bonusAttaque, bonusEsquive];
+    return (
+      bonuses.every((bonus) => Number.isInteger(bonus) && bonus >= -5 && bonus <= 5) &&
+      bonuses.reduce((total, bonus) => total + bonus, 0) === 0
+    );
+  });
   weaponForm = form(
     this.weaponModel,
     schema((path) => {
       required(path.name, { message: 'Le nom de l’arme est obligatoire.' });
-      min(path.bonusPv, -50, { message: 'Le bonus doit être compris entre -50 et 50.' });
-      max(path.bonusPv, 50, { message: 'Le bonus doit être compris entre -50 et 50.' });
-      min(path.bonusDegats, -50, { message: 'Le bonus doit être compris entre -50 et 50.' });
-      max(path.bonusDegats, 50, { message: 'Le bonus doit être compris entre -50 et 50.' });
-      min(path.bonusVitesse, -50, { message: 'Le bonus doit être compris entre -50 et 50.' });
-      max(path.bonusVitesse, 50, { message: 'Le bonus doit être compris entre -50 et 50.' });
+      min(path.bonusPv, -5, { message: 'Chaque bonus doit être compris entre -5 et 5.' });
+      max(path.bonusPv, 5, { message: 'Chaque bonus doit être compris entre -5 et 5.' });
+      min(path.bonusDegats, -5, { message: 'Chaque bonus doit être compris entre -5 et 5.' });
+      max(path.bonusDegats, 5, { message: 'Chaque bonus doit être compris entre -5 et 5.' });
+      min(path.bonusAttaque, -5, { message: 'Chaque bonus doit être compris entre -5 et 5.' });
+      max(path.bonusAttaque, 5, { message: 'Chaque bonus doit être compris entre -5 et 5.' });
+      min(path.bonusEsquive, -5, { message: 'Chaque bonus doit être compris entre -5 et 5.' });
+      max(path.bonusEsquive, 5, { message: 'Chaque bonus doit être compris entre -5 et 5.' });
     }),
   );
 
@@ -45,7 +66,13 @@ export class WeaponFormComponent {
           const id = params.get('id');
           this.weaponId.set(id);
           this.isLoading.set(id !== null);
-          this.weaponModel.set({ name: '', bonusPv: 0, bonusDegats: 0, bonusVitesse: 0 });
+          this.weaponModel.set({
+            name: '',
+            bonusPv: 0,
+            bonusDegats: 0,
+            bonusAttaque: 0,
+            bonusEsquive: 0,
+          });
 
           return id
             ? this.weaponService.getWeapon(id).pipe(
@@ -69,14 +96,15 @@ export class WeaponFormComponent {
             name: weapon.name,
             bonusPv: weapon.bonusPv,
             bonusDegats: weapon.bonusDegats,
-            bonusVitesse: weapon.bonusVitesse,
+            bonusAttaque: weapon.bonusAttaque,
+            bonusEsquive: weapon.bonusEsquive,
           });
         }
       });
   }
 
   async saveWeapon(): Promise<void> {
-    const { name: rawName, bonusPv, bonusDegats, bonusVitesse } = this.weaponModel();
+    const { name: rawName, bonusPv, bonusDegats, bonusAttaque, bonusEsquive } = this.weaponModel();
     const name = rawName.trim();
     if (!name || this.isSaving()) {
       if (!name) {
@@ -85,18 +113,16 @@ export class WeaponFormComponent {
       return;
     }
 
-    if (
-      ![bonusPv, bonusDegats, bonusVitesse].every(
-        (bonus) => Number.isInteger(bonus) && bonus >= -50 && bonus <= 50,
-      )
-    ) {
-      this.messageService.add('Chaque bonus doit être un nombre entier compris entre -50 et 50.');
+    if (!this.hasValidBonuses()) {
+      this.messageService.add(
+        'Chaque bonus doit être un entier entre -5 et 5 et la somme des 4 bonus doit être égale à 0.',
+      );
       return;
     }
 
     this.isSaving.set(true);
     try {
-      const weapon = { name, bonusPv, bonusDegats, bonusVitesse };
+      const weapon = { name, bonusPv, bonusDegats, bonusAttaque, bonusEsquive };
       const id = this.weaponId();
       if (id) {
         await this.weaponService.updateWeapon({ id, ...weapon });

@@ -55,9 +55,13 @@ export class HeroDetailComponent implements OnInit {
           hero.degats,
           equippedWeapons.map((weapon) => weapon.bonusDegats),
         ),
-        vitesse: this.getStatDetails(
-          hero.vitesse,
-          equippedWeapons.map((weapon) => weapon.bonusVitesse),
+        attaque: this.getStatDetails(
+          hero.attaque,
+          equippedWeapons.map((weapon) => weapon.bonusAttaque),
+        ),
+        esquive: this.getStatDetails(
+          hero.esquive,
+          equippedWeapons.map((weapon) => weapon.bonusEsquive),
         ),
       },
     };

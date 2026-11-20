@@ -12,8 +12,16 @@ describe('WeaponAssociationDialogComponent', () => {
   let associateHero: ReturnType<typeof vi.fn>;
   let addMessage: ReturnType<typeof vi.fn>;
   const heroes: HeroInterface[] = [
-    { id: 'hero-a1', name: 'Archer', favori: true, pv: 80, degats: 25, vitesse: 60 },
-    { id: 'hero-b2', name: 'Berserker', favori: false, pv: 90, degats: 40, vitesse: 30 },
+    { id: 'hero-a1', name: 'Archer', favori: true, pv: 10, degats: 10, attaque: 10, esquive: 10 },
+    {
+      id: 'hero-b2',
+      name: 'Berserker',
+      favori: false,
+      pv: 10,
+      degats: 10,
+      attaque: 10,
+      esquive: 10,
+    },
   ];
 
   beforeEach(async () => {

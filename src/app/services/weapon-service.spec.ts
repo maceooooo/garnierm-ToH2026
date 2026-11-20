@@ -53,9 +53,10 @@ describe('WeaponService', () => {
   const weapon: WeaponInterface = {
     id: 'weapon-a1',
     name: 'Épée',
-    bonusPv: 0,
-    bonusDegats: 25,
-    bonusVitesse: -10,
+    bonusPv: 2,
+    bonusDegats: -2,
+    bonusAttaque: 1,
+    bonusEsquive: -1,
     equippedHeroIds: [],
   };
 
@@ -68,7 +69,8 @@ describe('WeaponService', () => {
             name: weapon.name,
             bonusPv: weapon.bonusPv,
             bonusDegats: weapon.bonusDegats,
-            bonusVitesse: weapon.bonusVitesse,
+            bonusAttaque: weapon.bonusAttaque,
+            bonusEsquive: weapon.bonusEsquive,
             equippedHeroIds: weapon.equippedHeroIds,
           }),
           id: weapon.id,
@@ -81,7 +83,8 @@ describe('WeaponService', () => {
           name: weapon.name,
           bonusPv: weapon.bonusPv,
           bonusDegats: weapon.bonusDegats,
-          bonusVitesse: weapon.bonusVitesse,
+          bonusAttaque: weapon.bonusAttaque,
+          bonusEsquive: weapon.bonusEsquive,
           equippedHeroIds: weapon.equippedHeroIds,
         }),
         exists: () => true,
@@ -119,7 +122,8 @@ describe('WeaponService', () => {
             name: item.name,
             bonusPv: item.bonusPv,
             bonusDegats: item.bonusDegats,
-            bonusVitesse: item.bonusVitesse,
+            bonusAttaque: item.bonusAttaque,
+            bonusEsquive: item.bonusEsquive,
             equippedHeroIds: item.equippedHeroIds,
           }),
           id: item.id,
@@ -161,17 +165,19 @@ describe('WeaponService', () => {
     await expect(
       service.createWeapon({
         name: '  Épée  ',
-        bonusPv: 0,
-        bonusDegats: 50,
-        bonusVitesse: -50,
+        bonusPv: 5,
+        bonusDegats: -5,
+        bonusAttaque: -3,
+        bonusEsquive: 3,
       }),
     ).resolves.toBe('weapon-new1');
 
     expect(addDocMock).toHaveBeenCalledWith(expect.anything(), {
       name: 'Épée',
-      bonusPv: 0,
-      bonusDegats: 50,
-      bonusVitesse: -50,
+      bonusPv: 5,
+      bonusDegats: -5,
+      bonusAttaque: -3,
+      bonusEsquive: 3,
       equippedHeroIds: [],
     });
     expect(collectionMock).toHaveBeenCalledWith(expect.anything(), 'armes');
@@ -183,17 +189,30 @@ describe('WeaponService', () => {
         name: '   ',
         bonusPv: 0,
         bonusDegats: 0,
-        bonusVitesse: 0,
+        bonusAttaque: 0,
+        bonusEsquive: 0,
       }),
     ).rejects.toThrow('Le nom de l’arme est obligatoire.');
     expect(addDocMock).not.toHaveBeenCalled();
   });
 
-  it('should reject bonuses outside -50..50 before creating or updating', async () => {
-    const invalidWeapon = { ...weapon, bonusPv: -51 };
+  it('should accept bonuses at both range boundaries when their sum is zero', async () => {
+    await expect(
+      service.createWeapon({
+        name: 'Arme équilibrée',
+        bonusPv: 5,
+        bonusDegats: -5,
+        bonusAttaque: 5,
+        bonusEsquive: -5,
+      }),
+    ).resolves.toBe('weapon-new1');
+  });
+
+  it('should reject bonuses outside -5..5 before creating or updating', async () => {
+    const invalidWeapon = { ...weapon, bonusPv: -6, bonusDegats: 3 };
 
     await expect(service.createWeapon(invalidWeapon)).rejects.toThrow(
-      'Chaque bonus doit être un nombre entier compris entre -50 et 50.',
+      'Chaque bonus doit être un entier entre -5 et 5 et la somme des 4 bonus doit être égale à 0.',
     );
     await expect(service.updateWeapon(invalidWeapon)).rejects.toThrow(
       'Le nom et les bonus de l’arme doivent être valides.',
@@ -202,15 +221,35 @@ describe('WeaponService', () => {
     expect(updateDocMock).not.toHaveBeenCalled();
   });
 
+  it('should reject bonuses whose sum is not zero before creating or updating', async () => {
+    const unbalancedWeapon = { ...weapon, bonusPv: 3 };
+
+    await expect(service.createWeapon(unbalancedWeapon)).rejects.toThrow(
+      'Chaque bonus doit être un entier entre -5 et 5 et la somme des 4 bonus doit être égale à 0.',
+    );
+    await expect(service.updateWeapon(unbalancedWeapon)).rejects.toThrow(
+      'Le nom et les bonus de l’arme doivent être valides.',
+    );
+    expect(addDocMock).not.toHaveBeenCalled();
+    expect(updateDocMock).not.toHaveBeenCalled();
+  });
+
   it('should update all weapon fields without changing the document id', async () => {
-    await service.updateWeapon({ ...weapon, name: 'Hache', bonusDegats: -5 });
+    await service.updateWeapon({
+      ...weapon,
+      name: 'Hache',
+      bonusDegats: -1,
+      bonusAttaque: 0,
+      bonusEsquive: -1,
+    });
 
     expect(docMock).toHaveBeenCalledWith(expect.anything(), 'armes', weapon.id);
     expect(updateDocMock).toHaveBeenCalledWith(expect.anything(), {
       name: 'Hache',
-      bonusPv: 0,
-      bonusDegats: -5,
-      bonusVitesse: -10,
+      bonusPv: 2,
+      bonusDegats: -1,
+      bonusAttaque: 0,
+      bonusEsquive: -1,
     });
   });
 
@@ -241,14 +280,14 @@ describe('WeaponService', () => {
     });
   });
 
-  it('should treat legacy weapons without equipped hero ids as unassociated', async () => {
+  it('should default new bonuses on legacy weapons and treat them as unassociated', async () => {
     docSnapshotsMock.mockReturnValueOnce(
       of({
         data: () => ({
           name: weapon.name,
-          bonusPv: weapon.bonusPv,
-          bonusDegats: weapon.bonusDegats,
-          bonusVitesse: weapon.bonusVitesse,
+          bonusPv: 2,
+          bonusDegats: -2,
+          bonusVitesse: -10,
         }),
         exists: () => true,
         id: weapon.id,
@@ -256,7 +295,12 @@ describe('WeaponService', () => {
     );
 
     await expect(firstValueFrom(service.getWeapon(weapon.id))).resolves.toEqual({
-      ...weapon,
+      id: weapon.id,
+      name: weapon.name,
+      bonusPv: 2,
+      bonusDegats: -2,
+      bonusAttaque: 0,
+      bonusEsquive: 0,
       equippedHeroIds: [],
     });
   });
@@ -265,7 +309,13 @@ describe('WeaponService', () => {
     collectionSnapshotsMock.mockReturnValueOnce(
       of([
         {
-          data: () => ({ name: 'Arme invalide', bonusPv: 0, bonusDegats: 51, bonusVitesse: 0 }),
+          data: () => ({
+            name: 'Arme invalide',
+            bonusPv: 0,
+            bonusDegats: 0,
+            bonusAttaque: 6,
+            bonusEsquive: 0,
+          }),
           id: 'invalid-id',
         },
       ]),
@@ -276,6 +326,27 @@ describe('WeaponService', () => {
     );
   });
 
+  it('should reject documents whose valid bonuses do not sum to zero', async () => {
+    collectionSnapshotsMock.mockReturnValueOnce(
+      of([
+        {
+          data: () => ({
+            name: 'Arme déséquilibrée',
+            bonusPv: 1,
+            bonusDegats: 0,
+            bonusAttaque: 0,
+            bonusEsquive: 0,
+          }),
+          id: 'unbalanced-id',
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getWeapons())).rejects.toThrow(
+      'Le document arme "unbalanced-id" ne respecte pas le format attendu.',
+    );
+  });
+
   it('should reject an invalid equipped hero id list', async () => {
     docSnapshotsMock.mockReturnValueOnce(
       of({
@@ -283,7 +354,8 @@ describe('WeaponService', () => {
           name: weapon.name,
           bonusPv: weapon.bonusPv,
           bonusDegats: weapon.bonusDegats,
-          bonusVitesse: weapon.bonusVitesse,
+          bonusAttaque: weapon.bonusAttaque,
+          bonusEsquive: weapon.bonusEsquive,
           equippedHeroIds: ['hero-a1', ''],
         }),
         exists: () => true,

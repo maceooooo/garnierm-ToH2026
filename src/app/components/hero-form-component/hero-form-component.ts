@@ -33,17 +33,26 @@ export class HeroFormComponent {
   });
   isLoading = signal(false);
   isSaving = signal(false);
-  heroModel = signal({ name: '', favori: false, pv: 50, degats: 50, vitesse: 50 });
+  heroModel = signal({ name: '', favori: false, pv: 10, degats: 10, attaque: 10, esquive: 10 });
+  allocatedPoints = computed(() => {
+    const { pv, degats, attaque, esquive } = this.heroModel();
+    return pv + degats + attaque + esquive;
+  });
+  hasValidAllocation = computed(() => {
+    const { pv, degats, attaque, esquive } = this.heroModel();
+    return (
+      [pv, degats, attaque, esquive].every((stat) => Number.isInteger(stat) && stat >= 1) &&
+      this.allocatedPoints() <= 40
+    );
+  });
   heroForm = form(
     this.heroModel,
     schema((path) => {
       required(path.name, { message: 'Le nom du héros est obligatoire.' });
-      min(path.pv, 1, { message: 'Les PV doivent être compris entre 1 et 100.' });
-      max(path.pv, 100, { message: 'Les PV doivent être compris entre 1 et 100.' });
-      min(path.degats, 1, { message: 'Les dégâts doivent être compris entre 1 et 100.' });
-      max(path.degats, 100, { message: 'Les dégâts doivent être compris entre 1 et 100.' });
-      min(path.vitesse, 1, { message: 'La vitesse doit être comprise entre 1 et 100.' });
-      max(path.vitesse, 100, { message: 'La vitesse doit être comprise entre 1 et 100.' });
+      min(path.pv, 1, { message: 'Chaque caractéristique doit être au moins égale à 1.' });
+      min(path.degats, 1, { message: 'Chaque caractéristique doit être au moins égale à 1.' });
+      min(path.attaque, 1, { message: 'Chaque caractéristique doit être au moins égale à 1.' });
+      min(path.esquive, 1, { message: 'Chaque caractéristique doit être au moins égale à 1.' });
     }),
   );
 
@@ -61,7 +70,14 @@ export class HeroFormComponent {
           const id = params.get('id');
           this.heroId.set(id);
           this.isLoading.set(id !== null);
-          this.heroModel.set({ name: '', favori: false, pv: 50, degats: 50, vitesse: 50 });
+          this.heroModel.set({
+            name: '',
+            favori: false,
+            pv: 10,
+            degats: 10,
+            attaque: 10,
+            esquive: 10,
+          });
 
           return id
             ? this.heroService.getHero(id).pipe(
@@ -88,7 +104,8 @@ export class HeroFormComponent {
             favori: hero.favori,
             pv: hero.pv,
             degats: hero.degats,
-            vitesse: hero.vitesse,
+            attaque: hero.attaque,
+            esquive: hero.esquive,
           });
         }
       });
@@ -103,17 +120,17 @@ export class HeroFormComponent {
       return;
     }
 
-    const { pv, degats, vitesse } = this.heroModel();
-    if (
-      ![pv, degats, vitesse].every((stat) => Number.isInteger(stat) && stat >= 1 && stat <= 100)
-    ) {
-      this.messageService.add('Chaque compétence doit être un nombre entier entre 1 et 100.');
+    const { pv, degats, attaque, esquive } = this.heroModel();
+    if (!this.hasValidAllocation()) {
+      this.messageService.add(
+        'Les caractéristiques doivent être au moins à 1 et leur somme ne peut pas dépasser 40.',
+      );
       return;
     }
 
     this.isSaving.set(true);
     try {
-      const hero = { name, favori: this.heroModel().favori, pv, degats, vitesse };
+      const hero = { name, favori: this.heroModel().favori, pv, degats, attaque, esquive };
       const id = this.heroId();
       if (id) {
         await this.heroService.updateHero({ id, ...hero });

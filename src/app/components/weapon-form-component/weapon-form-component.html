@@ -13,7 +13,11 @@
       <input id="weapon-name" type="text" [formField]="weaponForm.name" />
 
       <fieldset class="entity-form-stats weapon-bonuses">
-        <legend>Bonus de statistiques (-50 à 50)</legend>
+        <legend>Bonus de caractéristiques (-5 à 5)</legend>
+        <p class="weapon-points-counter" aria-live="polite">
+          Solde à répartir pour atteindre 0 :
+          {{ remainingPoints() > 0 ? '+' : '' }}{{ remainingPoints() }}
+        </p>
         <label for="weapon-bonus-pv">
           <app-stat-icon kind="pv" />
           Bonus de PV
@@ -21,7 +25,7 @@
         <input id="weapon-bonus-pv" type="number" step="1" [formField]="weaponForm.bonusPv" />
         @if (weaponForm.bonusPv().touched() && weaponForm.bonusPv().invalid()) {
           <span class="entity-field-error field-error"
-            >Le bonus de PV doit être compris entre -50 et 50.</span
+            >Chaque bonus doit être compris entre -5 et 5.</span
           >
         }
 
@@ -37,29 +41,52 @@
         />
         @if (weaponForm.bonusDegats().touched() && weaponForm.bonusDegats().invalid()) {
           <span class="entity-field-error field-error"
-            >Le bonus de dégâts doit être compris entre -50 et 50.</span
+            >Chaque bonus doit être compris entre -5 et 5.</span
           >
         }
 
-        <label for="weapon-bonus-vitesse">
-          <app-stat-icon kind="vitesse" />
-          Bonus de vitesse
+        <label for="weapon-bonus-attaque">
+          <app-stat-icon kind="attaque" />
+          Bonus d’attaque
         </label>
         <input
-          id="weapon-bonus-vitesse"
+          id="weapon-bonus-attaque"
           type="number"
           step="1"
-          [formField]="weaponForm.bonusVitesse"
+          [formField]="weaponForm.bonusAttaque"
         />
-        @if (weaponForm.bonusVitesse().touched() && weaponForm.bonusVitesse().invalid()) {
+        @if (weaponForm.bonusAttaque().touched() && weaponForm.bonusAttaque().invalid()) {
           <span class="entity-field-error field-error"
-            >Le bonus de vitesse doit être compris entre -50 et 50.</span
+            >Chaque bonus doit être compris entre -5 et 5.</span
           >
+        }
+
+        <label for="weapon-bonus-esquive">
+          <app-stat-icon kind="esquive" />
+          Bonus d’esquive
+        </label>
+        <input
+          id="weapon-bonus-esquive"
+          type="number"
+          step="1"
+          [formField]="weaponForm.bonusEsquive"
+        />
+        @if (weaponForm.bonusEsquive().touched() && weaponForm.bonusEsquive().invalid()) {
+          <span class="entity-field-error field-error"
+            >Chaque bonus doit être compris entre -5 et 5.</span
+          >
+        }
+        @if (remainingPoints() !== 0) {
+          <span class="entity-field-error field-error" role="status">
+            Répartissez {{ remainingPoints() > 0 ? 'encore' : 'retirez' }}
+            {{ remainingPoints() > 0 ? remainingPoints() : -remainingPoints() }} point(s) pour
+            équilibrer les bonus.
+          </span>
         }
       </fieldset>
 
       <div class="entity-form-actions form-actions">
-        <button type="submit" [disabled]="isSaving()">
+        <button type="submit" [disabled]="isSaving() || !hasValidBonuses()">
           {{
             isSaving()
               ? 'Enregistrement…'

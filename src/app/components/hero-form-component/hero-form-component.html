@@ -19,7 +19,15 @@
       </label>
 
       <fieldset class="entity-form-stats hero-stats">
-        <legend>Compétences (1 à 100)</legend>
+        <legend>Caractéristiques (40 points maximum, minimum 1 chacune)</legend>
+        <p class="hero-points-counter" aria-live="polite">
+          Points répartis : {{ allocatedPoints() }} / 40
+        </p>
+        @if (allocatedPoints() > 40) {
+          <span class="entity-field-error field-error" role="alert">
+            La somme des caractéristiques ne peut pas dépasser 40 points.
+          </span>
+        }
         <label for="hero-pv">
           <app-stat-icon class="stat-icon" kind="pv" />
           Points de vie (PV)
@@ -27,7 +35,7 @@
         <input id="hero-pv" type="number" step="1" [formField]="heroForm.pv" />
         @if (heroForm.pv().touched() && heroForm.pv().invalid()) {
           <span class="entity-field-error field-error"
-            >Les PV doivent être compris entre 1 et 100.</span
+            >Les PV doivent être au moins égaux à 1.</span
           >
         }
 
@@ -38,24 +46,35 @@
         <input id="hero-degats" type="number" step="1" [formField]="heroForm.degats" />
         @if (heroForm.degats().touched() && heroForm.degats().invalid()) {
           <span class="entity-field-error field-error"
-            >Les dégâts doivent être compris entre 1 et 100.</span
+            >Les dégâts doivent être au moins égaux à 1.</span
           >
         }
 
-        <label for="hero-vitesse">
-          <app-stat-icon class="stat-icon" kind="vitesse" />
-          Vitesse
+        <label for="hero-attaque">
+          <app-stat-icon class="stat-icon" kind="attaque" />
+          Attaque
         </label>
-        <input id="hero-vitesse" type="number" step="1" [formField]="heroForm.vitesse" />
-        @if (heroForm.vitesse().touched() && heroForm.vitesse().invalid()) {
+        <input id="hero-attaque" type="number" step="1" [formField]="heroForm.attaque" />
+        @if (heroForm.attaque().touched() && heroForm.attaque().invalid()) {
           <span class="entity-field-error field-error"
-            >La vitesse doit être comprise entre 1 et 100.</span
+            >L’attaque doit être au moins égale à 1.</span
+          >
+        }
+
+        <label for="hero-esquive">
+          <app-stat-icon class="stat-icon" kind="esquive" />
+          Esquive
+        </label>
+        <input id="hero-esquive" type="number" step="1" [formField]="heroForm.esquive" />
+        @if (heroForm.esquive().touched() && heroForm.esquive().invalid()) {
+          <span class="entity-field-error field-error"
+            >L’esquive doit être au moins égale à 1.</span
           >
         }
       </fieldset>
 
       <div class="entity-form-actions form-actions">
-        <button type="submit" [disabled]="isSaving()">
+        <button type="submit" [disabled]="isSaving() || !hasValidAllocation()">
           {{
             isSaving()
               ? 'Enregistrement…'

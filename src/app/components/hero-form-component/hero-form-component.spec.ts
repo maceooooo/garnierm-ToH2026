@@ -29,7 +29,15 @@ describe('HeroFormComponent', () => {
     createHero = vi.fn().mockResolvedValue('hero-new1');
     updateHero = vi.fn().mockResolvedValue(undefined);
     getHero = vi.fn(() =>
-      of({ id: 'hero-a1', name: 'Hero A', favori: true, pv: 80, degats: 25, vitesse: 60 }),
+      of({
+        id: 'hero-a1',
+        name: 'Hero A',
+        favori: true,
+        pv: 10,
+        degats: 10,
+        attaque: 10,
+        esquive: 10,
+      }),
     );
     addMessage = vi.fn();
     routeParams = new BehaviorSubject(convertToParamMap({}));
@@ -74,9 +82,10 @@ describe('HeroFormComponent', () => {
     component.heroModel.set({
       name: '  Nouveau héros  ',
       favori: true,
-      pv: 100,
-      degats: 1,
-      vitesse: 50,
+      pv: 16,
+      degats: 10,
+      attaque: 8,
+      esquive: 6,
     });
 
     await component.saveHero();
@@ -84,9 +93,10 @@ describe('HeroFormComponent', () => {
     expect(createHero).toHaveBeenCalledWith({
       name: 'Nouveau héros',
       favori: true,
-      pv: 100,
-      degats: 1,
-      vitesse: 50,
+      pv: 16,
+      degats: 10,
+      attaque: 8,
+      esquive: 6,
     });
     expect(addMessage).toHaveBeenCalledWith('Le héros a été créé avec succès.');
     expect(navigate).toHaveBeenCalledWith(['/heroes']);
@@ -149,9 +159,10 @@ describe('HeroFormComponent', () => {
     component.heroModel.set({
       name: '   ',
       favori: false,
-      pv: 50,
-      degats: 50,
-      vitesse: 50,
+      pv: 10,
+      degats: 10,
+      attaque: 10,
+      esquive: 10,
     });
 
     await component.saveHero();
@@ -165,9 +176,10 @@ describe('HeroFormComponent', () => {
     component.heroModel.set({
       name: 'Nouveau héros',
       favori: false,
-      pv: 50,
-      degats: 50,
-      vitesse: 50,
+      pv: 10,
+      degats: 10,
+      attaque: 10,
+      esquive: 10,
     });
 
     await component.saveHero();
@@ -184,9 +196,10 @@ describe('HeroFormComponent', () => {
     component.heroModel.set({
       name: 'Hero A modifié',
       favori: false,
-      pv: 90,
-      degats: 35,
-      vitesse: 40,
+      pv: 15,
+      degats: 10,
+      attaque: 8,
+      esquive: 7,
     });
 
     await component.saveHero();
@@ -196,9 +209,10 @@ describe('HeroFormComponent', () => {
       id: 'hero-a1',
       name: 'Hero A modifié',
       favori: false,
-      pv: 90,
-      degats: 35,
-      vitesse: 40,
+      pv: 15,
+      degats: 10,
+      attaque: 8,
+      esquive: 7,
     });
     expect(createHero).not.toHaveBeenCalled();
     expect(addMessage).toHaveBeenCalledWith('Le héros a été modifié avec succès.');
@@ -211,9 +225,10 @@ describe('HeroFormComponent', () => {
           id: 'hero-a1',
           name: 'Hero A',
           favori: true,
-          pv: 80,
-          degats: 25,
-          vitesse: 60,
+          pv: 10,
+          degats: 10,
+          attaque: 10,
+          esquive: 10,
         });
       }),
     );
@@ -228,16 +243,17 @@ describe('HeroFormComponent', () => {
     component.heroModel.set({
       name: 'Héros invalide',
       favori: false,
-      pv: 50,
-      degats: 50,
-      vitesse: 101,
+      pv: 11,
+      degats: 10,
+      attaque: 10,
+      esquive: 10,
     });
 
     await component.saveHero();
 
     expect(createHero).not.toHaveBeenCalled();
     expect(addMessage).toHaveBeenCalledWith(
-      'Chaque compétence doit être un nombre entier entre 1 et 100.',
+      'Les caractéristiques doivent être au moins à 1 et leur somme ne peut pas dépasser 40.',
     );
   });
 });
