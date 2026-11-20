@@ -11,7 +11,7 @@ import { MessageService } from '../../services/message-service';
 @Component({
   imports: [RouterLink, StatIconComponent, DeleteConfirmationComponent],
   selector: 'app-hero-detail-component',
-  styleUrl: './hero-detail-component.css',
+  styleUrl: '../shared/entity-detail.css',
   templateUrl: './hero-detail-component.html',
 })
 export class HeroDetailComponent implements OnInit {
@@ -23,6 +23,7 @@ export class HeroDetailComponent implements OnInit {
 
   isDeleting = signal(false);
   isDeleteConfirmationOpen = signal(false);
+  isLoading = signal(true);
 
   hero = signal<HeroInterface | null>(null);
 
@@ -32,13 +33,20 @@ export class HeroDetailComponent implements OnInit {
       .pipe(
         switchMap((params) => {
           const id = params.get('id');
+          this.isLoading.set(true);
           return id ? this.heroService.getHero(id) : of(undefined);
         }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: (hero) => this.hero.set(hero ?? null),
-        error: () => this.messageService.add('Impossible de charger les détails du héros.'),
+        next: (hero) => {
+          this.hero.set(hero ?? null);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.isLoading.set(false);
+          this.messageService.add('Impossible de charger les détails du héros.');
+        },
       });
   }
 

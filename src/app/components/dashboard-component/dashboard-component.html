@@ -1,15 +1,15 @@
 <h2>Héros favoris</h2>
 
 <!-- L'ID sert à la navigation et au suivi Angular, tandis que le nom identifie le héros à l'écran. -->
-<ul class="heroes">
+<ul class="entity-list heroes">
   @for (hero of heroesModel(); track hero.id) {
     <li>
-      <a class="hero-view-link" [routerLink]="['/detail', hero.id]">
+      <a class="entity-view-link hero-view-link" [routerLink]="['/detail', hero.id]">
         <span class="hero-name">{{ hero.name }}</span>
         <span class="hero-favorite" aria-label="Favori" title="Favori">★</span>
       </a>
       <a
-        class="hero-edit-link"
+        class="entity-edit-link hero-edit-link"
         [routerLink]="['/heroes', hero.id, 'edit']"
         [attr.aria-label]="'Modifier ' + hero.name"
         title="Modifier le héros"

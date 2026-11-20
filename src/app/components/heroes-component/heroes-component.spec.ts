@@ -39,9 +39,13 @@ describe('HeroesComponent', () => {
   it('should display the hero name instead of its Firebase id', () => {
     fixture.detectChanges();
 
+    const list = fixture.nativeElement.querySelector('.entity-list') as HTMLElement;
     const heroLink = fixture.nativeElement.querySelector('.heroes a') as HTMLAnchorElement;
     const editLink = fixture.nativeElement.querySelector('.hero-edit-link') as HTMLAnchorElement;
     const favorite = heroLink.querySelector('.hero-favorite') as HTMLElement;
+    expect(list).not.toBeNull();
+    expect(heroLink.classList.contains('entity-view-link')).toBe(true);
+    expect(editLink.classList.contains('entity-edit-link')).toBe(true);
     expect(heroLink.textContent).toContain('Hero A');
     expect(heroLink.textContent).not.toContain('hero-a1');
     expect(heroLink.getAttribute('href')).toBe('/detail/hero-a1');

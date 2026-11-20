@@ -1,4 +1,4 @@
-<section class="hero-form">
+<section class="entity-form-shell hero-form">
   @if (isLoading()) {
     <p role="status">Chargement du héros…</p>
   } @else if (isEditing() && !heroModel().name) {
@@ -9,16 +9,16 @@
     <h2>{{ isEditing() ? 'Modifier le héros' : 'Créer un héros' }}</h2>
 
     <!-- Le même formulaire édite les champs métier ou en crée un nouveau; le service choisit l'opération Firestore. -->
-    <form (submit)="$event.preventDefault(); saveHero()">
+    <form class="entity-form" (submit)="$event.preventDefault(); saveHero()">
       <label for="hero-name">Nom du héros</label>
       <input id="hero-name" type="text" [formField]="heroForm.name" />
 
-      <label class="hero-favorite">
+      <label class="entity-form-favorite hero-favorite">
         Favori
         <input type="checkbox" [formField]="heroForm.favori" />
       </label>
 
-      <fieldset class="hero-stats">
+      <fieldset class="entity-form-stats hero-stats">
         <legend>Compétences (1 à 100)</legend>
         <label for="hero-pv">
           <app-stat-icon class="stat-icon" kind="pv" />
@@ -26,7 +26,9 @@
         </label>
         <input id="hero-pv" type="number" step="1" [formField]="heroForm.pv" />
         @if (heroForm.pv().touched() && heroForm.pv().invalid()) {
-          <span class="field-error">Les PV doivent être compris entre 1 et 100.</span>
+          <span class="entity-field-error field-error"
+            >Les PV doivent être compris entre 1 et 100.</span
+          >
         }
 
         <label for="hero-degats">
@@ -35,7 +37,9 @@
         </label>
         <input id="hero-degats" type="number" step="1" [formField]="heroForm.degats" />
         @if (heroForm.degats().touched() && heroForm.degats().invalid()) {
-          <span class="field-error">Les dégâts doivent être compris entre 1 et 100.</span>
+          <span class="entity-field-error field-error"
+            >Les dégâts doivent être compris entre 1 et 100.</span
+          >
         }
 
         <label for="hero-vitesse">
@@ -44,11 +48,13 @@
         </label>
         <input id="hero-vitesse" type="number" step="1" [formField]="heroForm.vitesse" />
         @if (heroForm.vitesse().touched() && heroForm.vitesse().invalid()) {
-          <span class="field-error">La vitesse doit être comprise entre 1 et 100.</span>
+          <span class="entity-field-error field-error"
+            >La vitesse doit être comprise entre 1 et 100.</span
+          >
         }
       </fieldset>
 
-      <div class="form-actions">
+      <div class="entity-form-actions form-actions">
         <button type="submit" [disabled]="isSaving()">
           {{
             isSaving()

@@ -37,6 +37,7 @@ describe('WeaponsComponent', () => {
   it('should link each weapon to its detail and edit routes', () => {
     fixture.detectChanges();
 
+    const list = fixture.nativeElement.querySelector('.entity-list') as HTMLElement;
     const viewLink = fixture.nativeElement.querySelector('.weapon-view-link') as HTMLAnchorElement;
     const editLink = fixture.nativeElement.querySelector('.weapon-edit-link') as HTMLAnchorElement;
     const createLink = fixture.nativeElement.querySelector(
@@ -44,6 +45,10 @@ describe('WeaponsComponent', () => {
     ) as HTMLAnchorElement;
 
     expect(viewLink.textContent).toContain('Épée');
+    expect(list).not.toBeNull();
+    expect(viewLink.classList.contains('entity-view-link')).toBe(true);
+    expect(editLink.classList.contains('entity-edit-link')).toBe(true);
+    expect(fixture.nativeElement.querySelector('.hero-favorite')).toBeNull();
     expect(viewLink.getAttribute('href')).toBe('/weapons/weapon-a1');
     expect(editLink.getAttribute('href')).toBe('/weapons/weapon-a1/edit');
     expect(editLink.getAttribute('aria-label')).toBe('Modifier Épée');

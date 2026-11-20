@@ -10,7 +10,7 @@ body {
   background: #fff;
 }
 
-.heroes {
+.entity-list {
   display: grid;
   gap: 10px;
   max-width: 560px;
@@ -19,7 +19,7 @@ body {
   list-style: none;
 }
 
-.heroes li {
+.entity-list li {
   display: flex;
   align-items: center;
   min-width: 0;
@@ -30,12 +30,12 @@ body {
   box-shadow: 0 2px 5px #2432470a;
 }
 
-.heroes li:hover {
+.entity-list li:hover {
   border-color: #9cb8e2;
   background: #f7faff;
 }
 
-.heroes a.hero-view-link {
+.entity-list a.entity-view-link {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -46,7 +46,7 @@ body {
   text-decoration: none;
 }
 
-.heroes .hero-edit-link {
+.entity-list .entity-edit-link {
   display: grid;
   flex: 0 0 36px;
   width: 36px;
@@ -58,7 +58,7 @@ body {
   text-decoration: none;
 }
 
-.heroes .hero-edit-link:hover {
+.entity-list .entity-edit-link:hover {
   background: #eaf1fc;
 }
 
@@ -79,17 +79,17 @@ body {
   background: var(--color-primary-dark);
 }
 
-.heroes .hero-favorite {
+.entity-list .hero-favorite {
   color: #d99a00;
   font-size: 1.2rem;
   line-height: 1;
 }
 
-.heroes a:focus-visible,
+.entity-list a:focus-visible,
 .home nav a:focus-visible,
 .form-actions button:focus-visible,
-.create-hero-button:focus-visible,
-.hero-edit-link:focus-visible,
+.create-entity-button:focus-visible,
+.entity-edit-link:focus-visible,
 .navigation-button:focus-visible,
 .message-box button:focus-visible {
   /* Un contour explicite maintient un repère visible lors de la navigation au clavier. */
@@ -97,9 +97,28 @@ body {
   outline-offset: 3px;
 }
 
-.heroes .hero-name {
+.entity-list .hero-name,
+.entity-list .weapon-name {
   flex: 1;
   font-weight: 650;
+}
+
+.create-entity-button {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--color-primary);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.create-entity-button:hover {
+  background: var(--color-primary-dark);
 }
 
 @media (prefers-reduced-motion: reduce) {

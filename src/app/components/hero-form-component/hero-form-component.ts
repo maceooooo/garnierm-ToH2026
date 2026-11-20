@@ -10,7 +10,7 @@ import { StatIconComponent } from '../stat-icon-component/stat-icon-component';
 @Component({
   imports: [FormField, RouterLink, StatIconComponent],
   selector: 'app-hero-form-component',
-  styleUrl: './hero-form-component.css',
+  styleUrl: '../shared/entity-form.css',
   templateUrl: './hero-form-component.html',
 })
 export class HeroFormComponent {

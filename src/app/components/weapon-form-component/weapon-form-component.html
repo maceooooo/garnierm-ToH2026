@@ -1,4 +1,4 @@
-<section class="weapon-form">
+<section class="entity-form-shell weapon-form">
   @if (isLoading()) {
     <p role="status">Chargement de l’arme…</p>
   } @else if (isEditing() && !weaponModel().name) {
@@ -8,11 +8,11 @@
   } @else {
     <h2>{{ isEditing() ? 'Modifier l’arme' : 'Créer une arme' }}</h2>
 
-    <form (submit)="$event.preventDefault(); saveWeapon()">
+    <form class="entity-form" (submit)="$event.preventDefault(); saveWeapon()">
       <label for="weapon-name">Nom de l’arme</label>
       <input id="weapon-name" type="text" [formField]="weaponForm.name" />
 
-      <fieldset class="weapon-bonuses">
+      <fieldset class="entity-form-stats weapon-bonuses">
         <legend>Bonus de statistiques (-50 à 50)</legend>
         <label for="weapon-bonus-pv">
           <app-stat-icon kind="pv" />
@@ -20,7 +20,9 @@
         </label>
         <input id="weapon-bonus-pv" type="number" step="1" [formField]="weaponForm.bonusPv" />
         @if (weaponForm.bonusPv().touched() && weaponForm.bonusPv().invalid()) {
-          <span class="field-error">Le bonus de PV doit être compris entre -50 et 50.</span>
+          <span class="entity-field-error field-error"
+            >Le bonus de PV doit être compris entre -50 et 50.</span
+          >
         }
 
         <label for="weapon-bonus-degats">
@@ -34,7 +36,9 @@
           [formField]="weaponForm.bonusDegats"
         />
         @if (weaponForm.bonusDegats().touched() && weaponForm.bonusDegats().invalid()) {
-          <span class="field-error">Le bonus de dégâts doit être compris entre -50 et 50.</span>
+          <span class="entity-field-error field-error"
+            >Le bonus de dégâts doit être compris entre -50 et 50.</span
+          >
         }
 
         <label for="weapon-bonus-vitesse">
@@ -48,11 +52,13 @@
           [formField]="weaponForm.bonusVitesse"
         />
         @if (weaponForm.bonusVitesse().touched() && weaponForm.bonusVitesse().invalid()) {
-          <span class="field-error">Le bonus de vitesse doit être compris entre -50 et 50.</span>
+          <span class="entity-field-error field-error"
+            >Le bonus de vitesse doit être compris entre -50 et 50.</span
+          >
         }
       </fieldset>
 
-      <div class="form-actions">
+      <div class="entity-form-actions form-actions">
         <button type="submit" [disabled]="isSaving()">
           {{
             isSaving()

@@ -14,8 +14,9 @@ import {
   where,
 } from '@angular/fire/firestore';
 import { HeroInterface } from '../data/heroInterface';
-import { Observable, concatMap, from, map, of, switchMap, tap, timer } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { MessageService } from './message-service';
+import { revealInitialList } from './progressive-list';
 
 function isValidStat(value: unknown): value is number {
   return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 100;
@@ -61,14 +62,13 @@ export class HeroService {
    * @remarks Les erreurs Firestore et les documents invalides sont émises par l'Observable.
    */
   getHeroes(maxHeroes: number = -1, favoritesOnly = false): Observable<HeroInterface[]> {
-    let isInitialSnapshot = true;
     const heroesCollection = collection(this.firestore, 'heroes');
     const heroesQuery = favoritesOnly
       ? query(heroesCollection, where('favori', '==', true))
       : query(heroesCollection, orderBy('name'));
 
-    // Chaque instantané est validé puis limité; seule la réponse initiale est révélée progressivement.
-    return collectionSnapshots(heroesQuery).pipe(
+    // Chaque instantané est validé puis limité avant la révélation progressive de la première liste.
+    const snapshots = collectionSnapshots(heroesQuery).pipe(
       map((documents) => documents.map(mapHeroDocument)),
       map((heroes) =>
         favoritesOnly
@@ -78,24 +78,10 @@ export class HeroService {
           : heroes,
       ),
       map((heroes) => (maxHeroes === -1 ? heroes : heroes.slice(0, maxHeroes))),
-      switchMap((heroes) => {
-        if (!isInitialSnapshot) {
-          // Les changements suivants remplacent immédiatement la liste complète, sans rejouer l'animation initiale.
-          return of(heroes);
-        }
+    );
 
-        isInitialSnapshot = false;
-        // Les émissions partielles affichent les héros au fil de l'arrivée, plutôt que d'attendre toute la séquence.
-        return from(heroes).pipe(
-          concatMap((_, index) =>
-            timer(index === 0 ? 0 : 200).pipe(map(() => heroes.slice(0, index + 1))),
-          ),
-          tap({
-            // Le signalement intervient après la séquence initiale complète, pas à chaque émission partielle.
-            complete: () => this.messageService.add('HeroService : héros récupérés avec succès'),
-          }),
-        );
-      }),
+    return revealInitialList(snapshots, 200, () =>
+      this.messageService.add('HeroService : héros récupérés avec succès'),
     );
   }
 

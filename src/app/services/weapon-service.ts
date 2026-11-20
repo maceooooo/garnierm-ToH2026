@@ -14,6 +14,8 @@ import {
 } from '@angular/fire/firestore';
 import { Observable, map } from 'rxjs';
 import { WeaponInterface } from '../data/weapon-interface';
+import { MessageService } from './message-service';
+import { revealInitialList } from './progressive-list';
 
 function isValidBonus(value: unknown): value is number {
   return typeof value === 'number' && Number.isInteger(value) && value >= -50 && value <= 50;
@@ -51,6 +53,7 @@ function mapWeaponDocument(document: DocumentSnapshot): WeaponInterface {
 @Service()
 export class WeaponService {
   private firestore = inject(Firestore);
+  private messageService = inject(MessageService);
 
   /**
    * Écoute la collection d'armes et trie les résultats par nom.
@@ -60,8 +63,12 @@ export class WeaponService {
    */
   getWeapons(): Observable<WeaponInterface[]> {
     const weaponsCollection = collection(this.firestore, 'armes');
-    return collectionSnapshots(query(weaponsCollection, orderBy('name'))).pipe(
+    const snapshots = collectionSnapshots(query(weaponsCollection, orderBy('name'))).pipe(
       map((documents) => documents.map(mapWeaponDocument)),
+    );
+
+    return revealInitialList(snapshots, 200, () =>
+      this.messageService.add('WeaponService : armes récupérées avec succès'),
     );
   }
 

@@ -41,6 +41,9 @@ describe('DashboardComponent', () => {
 
     const heroLink = fixture.nativeElement.querySelector('.heroes a') as HTMLAnchorElement;
     const editLink = fixture.nativeElement.querySelector('.hero-edit-link') as HTMLAnchorElement;
+    expect(heroLink.closest('ul')?.classList.contains('entity-list')).toBe(true);
+    expect(heroLink.classList.contains('entity-view-link')).toBe(true);
+    expect(editLink.classList.contains('entity-edit-link')).toBe(true);
     expect(heroLink.textContent).toContain('Hero B');
     expect(heroLink.textContent).not.toContain('hero-b2');
     expect(heroLink.getAttribute('href')).toBe('/detail/hero-b2');

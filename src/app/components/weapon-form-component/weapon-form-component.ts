@@ -10,7 +10,7 @@ import { WeaponService } from '../../services/weapon-service';
 @Component({
   imports: [FormField, RouterLink, StatIconComponent],
   selector: 'app-weapon-form-component',
-  styleUrl: './weapon-form-component.css',
+  styleUrl: '../shared/entity-form.css',
   templateUrl: './weapon-form-component.html',
 })
 export class WeaponFormComponent {

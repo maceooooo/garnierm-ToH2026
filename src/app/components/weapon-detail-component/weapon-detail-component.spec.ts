@@ -61,6 +61,9 @@ describe('WeaponDetailComponent', () => {
     fixture.detectChanges();
 
     const bonuses = fixture.nativeElement.querySelector('.weapon-bonuses') as HTMLElement;
+    expect(bonuses.classList.contains('entity-attributes')).toBe(true);
+    expect(bonuses.parentElement?.classList.contains('entity-detail-content')).toBe(true);
+    expect(fixture.nativeElement.querySelector('.weapon-back-link')).toBeNull();
     expect(bonuses.textContent).toContain('Bonus de PV : 0');
     expect(bonuses.textContent).toContain('Bonus de dégâts : 25');
     expect(bonuses.textContent).toContain('Bonus de vitesse : -10');
@@ -70,11 +73,13 @@ describe('WeaponDetailComponent', () => {
   it('should link to edit and share the delete confirmation dialog', () => {
     fixture.detectChanges();
 
-    const editLink = fixture.debugElement.query(By.css('.weapon-edit-action'));
+    const editButton = fixture.debugElement.query(By.css('.weapon-edit-action'));
     const deleteButton = fixture.nativeElement.querySelector(
       '.weapon-delete-action',
     ) as HTMLButtonElement;
-    expect(editLink.injector.get(RouterLink).urlTree?.toString()).toBe('/weapons/weapon-a1/edit');
+    expect(editButton.nativeElement.tagName).toBe('BUTTON');
+    expect(editButton.nativeElement.classList.contains('entity-action')).toBe(true);
+    expect(editButton.injector.get(RouterLink).urlTree?.toString()).toBe('/weapons/weapon-a1/edit');
     expect(deleteButton.getAttribute('aria-label')).toBe('Supprimer Épée');
 
     deleteButton.click();

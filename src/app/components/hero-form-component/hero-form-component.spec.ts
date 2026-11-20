@@ -54,6 +54,9 @@ describe('HeroFormComponent', () => {
 
   it('should create a hero with a normalized name and favorite state', async () => {
     fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.entity-form-shell')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.entity-form')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.entity-form-stats')).not.toBeNull();
     const cancelButton = fixture.nativeElement.querySelector(
       '.navigation-button',
     ) as HTMLButtonElement;

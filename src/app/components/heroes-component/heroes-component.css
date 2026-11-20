@@ -1,25 +1,4 @@
-/* La marge sépare le titre de la navigation précédente. */
 h2 {
-  color: #369;
   margin-top: 25px;
-}
-
-/* Le titre de la liste reste cohérent avec les autres vues grâce à la couleur de thème. */
-h2 {
   color: var(--color-primary-dark);
-}
-
-.create-hero-button {
-  display: inline-block;
-  margin-bottom: 8px;
-  padding: 10px 16px;
-  border-radius: 9px;
-  background: var(--color-primary);
-  color: #fff;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.create-hero-button:hover {
-  background: var(--color-primary-dark);
 }

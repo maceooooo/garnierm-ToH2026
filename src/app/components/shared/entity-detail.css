@@ -1,29 +1,28 @@
-/* La fiche est isolée du flux de navigation tout en gardant un espacement régulier. */
 :host {
   display: block;
   margin: 15px 0;
 }
 
-.hero-detail-title,
-.hero-detail-actions {
+.entity-detail-title,
+.entity-detail-actions {
   display: flex;
   align-items: center;
 }
 
-.hero-detail-title {
+.entity-detail-title {
   justify-content: space-between;
   gap: 16px;
 }
 
-.hero-detail-title h2 {
+.entity-detail-title h2 {
   margin: 0;
 }
 
-.hero-detail-actions {
+.entity-detail-actions {
   gap: 8px;
 }
 
-.hero-action {
+.entity-action {
   display: grid;
   width: 40px;
   height: 40px;
@@ -34,56 +33,52 @@
   color: #2457a6;
   font: inherit;
   font-size: 1.3rem;
+  text-decoration: none;
   cursor: pointer;
 }
 
-.hero-action:hover {
+.entity-action:hover {
   background: #dce8f8;
 }
 
-.hero-delete-action {
+.entity-delete-action {
   background: #fff0f0;
   color: #a33a3a;
 }
 
-.hero-delete-action:hover {
+.entity-delete-action:hover {
   background: #ffe0e0;
 }
 
-.hero-action:disabled {
+.entity-action:disabled {
   cursor: wait;
   opacity: 0.65;
 }
 
-.hero-detail-content {
+.entity-detail-content {
   display: grid;
   grid-template-columns: max-content max-content;
   align-items: start;
   gap: 60px;
-  margin-top: 16px;
+  margin: 16px 0;
 }
 
-.hero-info div {
+.entity-info div {
   margin: 8px 0;
 }
 
-.hero-info div:first-child {
-  /* Le premier bloc sert d'en-tête visuel avant les autres attributs du héros. */
-  font-size: 18px;
+.entity-info div:first-child {
   color: #369;
+  font-size: 18px;
 }
 
-.hero-info div:first-child b {
-  font-weight: bold;
-}
-
-.hero-stats {
+.entity-attributes {
   display: grid;
   gap: 10px;
   margin: 0;
 }
 
-.hero-stats p {
+.entity-attributes p {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -91,7 +86,7 @@
 }
 
 @media (max-width: 600px) {
-  .hero-detail-content {
+  .entity-detail-content {
     grid-template-columns: 1fr;
     gap: 8px;
   }

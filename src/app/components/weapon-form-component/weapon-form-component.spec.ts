@@ -106,6 +106,9 @@ describe('WeaponFormComponent', () => {
   it('should expose validation boundaries and use one editable form for create and update', () => {
     fixture.detectChanges();
 
+    expect(fixture.nativeElement.querySelector('.entity-form-shell')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.entity-form')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.entity-form-stats')).not.toBeNull();
     expect(fixture.nativeElement.querySelectorAll('input[type="number"]')).toHaveLength(3);
     expect(fixture.nativeElement.querySelectorAll('app-stat-icon')).toHaveLength(3);
     const cancelLink = fixture.debugElement

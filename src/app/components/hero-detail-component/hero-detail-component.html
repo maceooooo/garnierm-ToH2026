@@ -1,11 +1,13 @@
-@if (hero(); as selectedHero) {
+@if (isLoading()) {
+  <p role="status">Chargement du héros…</p>
+} @else if (hero(); as selectedHero) {
   <!-- Cette page reste en lecture seule; l'édition a une route dédiée. -->
-  <div class="hero-detail-title">
+  <div class="entity-detail-title hero-detail-title">
     <h2>Détails de {{ selectedHero.name }}</h2>
-    <div class="hero-detail-actions">
+    <div class="entity-detail-actions hero-detail-actions">
       <button
         type="button"
-        class="hero-action hero-edit-action"
+        class="entity-action entity-edit-action hero-action hero-edit-action"
         [routerLink]="['/heroes', selectedHero.id, 'edit']"
         [attr.aria-label]="'Modifier ' + selectedHero.name"
         title="Modifier le héros"
@@ -14,7 +16,7 @@
       </button>
       <button
         type="button"
-        class="hero-action hero-delete-action"
+        class="entity-action entity-delete-action hero-action hero-delete-action"
         [attr.aria-label]="'Supprimer ' + selectedHero.name"
         title="Supprimer le héros"
         [disabled]="isDeleting()"
@@ -24,13 +26,13 @@
       </button>
     </div>
   </div>
-  <div class="hero-detail-content">
-    <div class="hero-info">
+  <div class="entity-detail-content hero-detail-content">
+    <div class="entity-info hero-info">
       <div>Identifiant : {{ selectedHero.id }}</div>
       <div>Nom : {{ selectedHero.name }}</div>
       <div>Favori : {{ selectedHero.favori ? 'Oui ★' : 'Non' }}</div>
     </div>
-    <section class="hero-stats" aria-label="Compétences du héros">
+    <section class="entity-attributes hero-stats" aria-label="Compétences du héros">
       <p>
         <app-stat-icon class="stat-icon" kind="pv" />
         Points de vie (PV) : {{ selectedHero.pv }}

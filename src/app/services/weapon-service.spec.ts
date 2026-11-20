@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { Firestore } from '@angular/fire/firestore';
 import { firstValueFrom, of } from 'rxjs';
-import { vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { WeaponInterface } from '../data/weapon-interface';
+import { MessageService } from './message-service';
 import { WeaponService } from './weapon-service';
 
 const {
@@ -42,6 +43,7 @@ vi.mock('@angular/fire/firestore', () => ({
 
 describe('WeaponService', () => {
   let service: WeaponService;
+  const addMessage = vi.fn();
   const weapon: WeaponInterface = {
     id: 'weapon-a1',
     name: 'Épée',
@@ -81,14 +83,52 @@ describe('WeaponService', () => {
     updateDocMock.mockResolvedValue(undefined);
     deleteDocMock.mockResolvedValue(undefined);
     TestBed.configureTestingModule({
-      providers: [{ provide: Firestore, useValue: {} }],
+      providers: [
+        { provide: Firestore, useValue: {} },
+        { provide: MessageService, useValue: { add: addMessage } },
+      ],
     });
     service = TestBed.inject(WeaponService);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should read weapons from the armes collection', async () => {
     await expect(firstValueFrom(service.getWeapons())).resolves.toEqual([weapon]);
     expect(collectionMock).toHaveBeenCalledWith(expect.anything(), 'armes');
+  });
+
+  it('should reveal the first weapon list progressively and use live snapshots immediately after', () => {
+    vi.useFakeTimers();
+    const secondWeapon = { ...weapon, id: 'weapon-b2', name: 'Hache' };
+    collectionSnapshotsMock.mockReturnValueOnce(
+      of(
+        [weapon, secondWeapon].map((item) => ({
+          data: () => ({
+            name: item.name,
+            bonusPv: item.bonusPv,
+            bonusDegats: item.bonusDegats,
+            bonusVitesse: item.bonusVitesse,
+          }),
+          id: item.id,
+        })),
+      ),
+    );
+    const received: string[][] = [];
+
+    service.getWeapons().subscribe((weapons) => {
+      received.push(weapons.map((item) => item.id));
+    });
+
+    vi.advanceTimersByTime(0);
+    expect(received).toEqual([['weapon-a1']]);
+    vi.advanceTimersByTime(199);
+    expect(received).toEqual([['weapon-a1']]);
+    vi.advanceTimersByTime(1);
+    expect(received).toEqual([['weapon-a1'], ['weapon-a1', 'weapon-b2']]);
+    expect(addMessage).toHaveBeenCalledWith('WeaponService : armes récupérées avec succès');
   });
 
   it('should return a weapon by Firestore id', async () => {

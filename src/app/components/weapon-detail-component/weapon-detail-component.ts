@@ -11,7 +11,7 @@ import { WeaponService } from '../../services/weapon-service';
 @Component({
   imports: [RouterLink, StatIconComponent, DeleteConfirmationComponent],
   selector: 'app-weapon-detail-component',
-  styleUrl: './weapon-detail-component.css',
+  styleUrl: '../shared/entity-detail.css',
   templateUrl: './weapon-detail-component.html',
 })
 export class WeaponDetailComponent implements OnInit {

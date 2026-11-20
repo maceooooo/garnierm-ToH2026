@@ -68,6 +68,8 @@ describe('HeroDetailComponent', () => {
     expect(skills.parentElement?.querySelector('.hero-info')).not.toBeNull();
     expect(skills.parentElement?.firstElementChild?.classList.contains('hero-info')).toBe(true);
     expect(skills.parentElement?.lastElementChild).toBe(skills);
+    expect(skills.classList.contains('entity-attributes')).toBe(true);
+    expect(skills.parentElement?.classList.contains('entity-detail-content')).toBe(true);
   });
 
   it('should render accessible edit and delete icon buttons beside the title', () => {
