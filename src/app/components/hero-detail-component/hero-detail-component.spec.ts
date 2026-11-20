@@ -90,7 +90,7 @@ describe('HeroDetailComponent', () => {
     const editRoute = fixture.debugElement
       .query(By.css('.hero-edit-action'))
       .injector.get(RouterLink);
-    expect(editRoute.urlTree?.toString()).toBe('/heroes/hero-a1/edit');
+    expect(editRoute.urlTree?.toString()).toBe('/heroes/hero-a1/edit?returnTo=detail');
   });
 
   it('should open a styled confirmation without deleting immediately', () => {

@@ -48,7 +48,7 @@ describe('DashboardComponent', () => {
     expect(heroLink.textContent).not.toContain('hero-b2');
     expect(heroLink.getAttribute('href')).toBe('/detail/hero-b2');
     expect(heroLink.querySelector('.hero-favorite')?.textContent).toContain('★');
-    expect(editLink.getAttribute('href')).toBe('/heroes/hero-b2/edit');
+    expect(editLink.getAttribute('href')).toBe('/heroes/hero-b2/edit?returnTo=dashboard');
   });
 
   it('should request only favorites for the dashboard', () => {

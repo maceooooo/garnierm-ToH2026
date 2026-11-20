@@ -11,6 +11,7 @@
       <a
         class="entity-edit-link hero-edit-link"
         [routerLink]="['/heroes', hero.id, 'edit']"
+        [queryParams]="{ returnTo: 'dashboard' }"
         [attr.aria-label]="'Modifier ' + hero.name"
         title="Modifier le héros"
       >

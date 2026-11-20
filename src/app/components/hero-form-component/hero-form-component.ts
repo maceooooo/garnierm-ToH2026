@@ -22,6 +22,15 @@ export class HeroFormComponent {
 
   heroId = signal<string | null>(null);
   isEditing = computed(() => this.heroId() !== null);
+  returnTo = signal<'dashboard' | 'detail' | null>(null);
+  cancelRoute = computed(() => {
+    if (this.returnTo() === 'dashboard') {
+      return ['/dashboard'];
+    }
+
+    const heroId = this.heroId();
+    return this.returnTo() === 'detail' && heroId ? ['/detail', heroId] : ['/heroes'];
+  });
   isLoading = signal(false);
   isSaving = signal(false);
   heroModel = signal({ name: '', favori: false, pv: 50, degats: 50, vitesse: 50 });
@@ -39,6 +48,12 @@ export class HeroFormComponent {
   );
 
   ngOnInit(): void {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const returnTo = params.get('returnTo');
+      // Seules les pages d'origine prévues sont acceptées; toute autre valeur revient à la liste.
+      this.returnTo.set(returnTo === 'dashboard' || returnTo === 'detail' ? returnTo : null);
+    });
+
     // L'absence d'ID indique la création; un ID déclenche la lecture temps réel avant d'afficher le formulaire.
     this.route.paramMap
       .pipe(

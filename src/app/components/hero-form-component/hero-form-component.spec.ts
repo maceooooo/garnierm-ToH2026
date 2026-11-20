@@ -23,6 +23,7 @@ describe('HeroFormComponent', () => {
   let addMessage: ReturnType<typeof vi.fn>;
   let navigateByUrl: ReturnType<typeof vi.spyOn>;
   let routeParams: BehaviorSubject<ParamMap>;
+  let routeQueryParams: BehaviorSubject<ParamMap>;
 
   beforeEach(async () => {
     createHero = vi.fn().mockResolvedValue('hero-new1');
@@ -32,6 +33,7 @@ describe('HeroFormComponent', () => {
     );
     addMessage = vi.fn();
     routeParams = new BehaviorSubject(convertToParamMap({}));
+    routeQueryParams = new BehaviorSubject(convertToParamMap({}));
 
     await TestBed.configureTestingModule({
       imports: [HeroFormComponent],
@@ -39,7 +41,10 @@ describe('HeroFormComponent', () => {
         provideRouter([]),
         {
           provide: ActivatedRoute,
-          useValue: { paramMap: routeParams.asObservable() },
+          useValue: {
+            paramMap: routeParams.asObservable(),
+            queryParamMap: routeQueryParams.asObservable(),
+          },
         },
         { provide: HeroService, useValue: { createHero, updateHero, getHero } },
         { provide: MessageService, useValue: { add: addMessage } },
@@ -85,6 +90,37 @@ describe('HeroFormComponent', () => {
     });
     expect(addMessage).toHaveBeenCalledWith('Le héros a été créé avec succès.');
     expect(navigateByUrl).toHaveBeenCalledWith('/heroes');
+  });
+
+  it('should return to the dashboard when editing was opened there', () => {
+    routeQueryParams.next(convertToParamMap({ returnTo: 'dashboard' }));
+    fixture.detectChanges();
+
+    const cancelRoute = fixture.debugElement
+      .query(By.css('.navigation-button'))
+      .injector.get(RouterLink);
+    expect(cancelRoute.urlTree?.toString()).toBe('/dashboard');
+  });
+
+  it('should return to the hero details when editing was opened there', () => {
+    routeParams.next(convertToParamMap({ id: 'hero-a1' }));
+    routeQueryParams.next(convertToParamMap({ returnTo: 'detail' }));
+    fixture.detectChanges();
+
+    const cancelRoute = fixture.debugElement
+      .query(By.css('.navigation-button'))
+      .injector.get(RouterLink);
+    expect(cancelRoute.urlTree?.toString()).toBe('/detail/hero-a1');
+  });
+
+  it('should use the hero list for an unrecognized return destination', () => {
+    routeQueryParams.next(convertToParamMap({ returnTo: '/external' }));
+    fixture.detectChanges();
+
+    const cancelRoute = fixture.debugElement
+      .query(By.css('.navigation-button'))
+      .injector.get(RouterLink);
+    expect(cancelRoute.urlTree?.toString()).toBe('/heroes');
   });
 
   it('should reject a blank name without writing to Firestore', async () => {

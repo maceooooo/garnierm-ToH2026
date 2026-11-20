@@ -64,7 +64,9 @@
                 : 'Créer le héros'
           }}
         </button>
-        <button type="button" class="navigation-button" routerLink="/heroes">Annuler</button>
+        <button type="button" class="navigation-button" [routerLink]="cancelRoute()">
+          Annuler
+        </button>
       </div>
     </form>
   }

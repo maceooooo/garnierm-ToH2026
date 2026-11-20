@@ -9,6 +9,7 @@
         type="button"
         class="entity-action entity-edit-action hero-action hero-edit-action"
         [routerLink]="['/heroes', selectedHero.id, 'edit']"
+        [queryParams]="{ returnTo: 'detail' }"
         [attr.aria-label]="'Modifier ' + selectedHero.name"
         title="Modifier le héros"
       >
