@@ -11,3 +11,24 @@ h2 {
   background: #fff5f5;
   color: #8d2929;
 }
+
+.weapon-associate-button {
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: #eaf1fc;
+  color: #2457a6;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.weapon-associate-button:hover {
+  background: #dce8f8;
+}
+
+.weapon-associate-button:focus-visible {
+  outline: 3px solid #82a9e8;
+  outline-offset: 2px;
+}

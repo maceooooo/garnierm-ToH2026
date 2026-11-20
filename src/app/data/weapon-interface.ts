@@ -5,4 +5,5 @@ export interface WeaponInterface {
   bonusPv: number;
   bonusDegats: number;
   bonusVitesse: number;
+  equippedHeroIds: string[];
 }

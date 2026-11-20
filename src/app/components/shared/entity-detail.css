@@ -50,6 +50,22 @@
   background: #ffe0e0;
 }
 
+.weapon-associate-action {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: #eaf1fc;
+  color: #2457a6;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.weapon-associate-action:hover {
+  background: #dce8f8;
+}
+
 .entity-action:disabled {
   cursor: wait;
   opacity: 0.65;
@@ -83,6 +99,89 @@
   align-items: center;
   gap: 8px;
   margin: 0;
+}
+
+.hero-stats .hero-stat-value {
+  display: inline-grid;
+  vertical-align: baseline;
+}
+
+.hero-stats .hero-stat-total,
+.hero-stats .hero-stat-breakdown {
+  grid-area: 1 / 1;
+}
+
+.hero-stats .hero-stat-breakdown {
+  visibility: hidden;
+}
+
+.hero-stats .hero-stat-row:hover .hero-stat-total,
+.hero-stats .hero-stat-row:focus-visible .hero-stat-total {
+  visibility: hidden;
+}
+
+.hero-stats .hero-stat-row:hover .hero-stat-breakdown,
+.hero-stats .hero-stat-row:focus-visible .hero-stat-breakdown {
+  visibility: visible;
+}
+
+.hero-stats .hero-stat-row:focus-visible {
+  outline: 2px solid #82a9e8;
+  outline-offset: 3px;
+}
+
+.equipped-weapons {
+  max-width: 720px;
+  margin: 24px 0;
+}
+
+.equipped-weapons h3 {
+  margin: 0 0 10px;
+  color: var(--color-primary-dark);
+}
+
+.equipped-weapon-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.equipped-weapon-list li {
+  min-width: 0;
+}
+
+.equipped-weapon-link {
+  display: flex;
+  align-items: center;
+  justify-self: start;
+  width: 140px;
+  max-width: 100%;
+  min-height: 36px;
+  padding: 4px 8px;
+  border: 1px solid #d7e0ec;
+  border-radius: 7px;
+  background: #fff;
+  color: #2457a6;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.equipped-weapon-link:hover {
+  border-color: #9cb8e2;
+  background: #f7faff;
+}
+
+.equipped-weapon-link:focus-visible {
+  outline: 3px solid #82a9e8;
+  outline-offset: 2px;
+}
+
+.no-equipped-weapons {
+  margin: 0;
+  color: #526174;
 }
 
 @media (max-width: 600px) {

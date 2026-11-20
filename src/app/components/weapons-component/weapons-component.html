@@ -22,6 +22,18 @@
       >
         ✎
       </a>
+      <button
+        type="button"
+        class="weapon-associate-button"
+        [attr.aria-label]="'Associer ' + weapon.name + ' à un héros'"
+        (click)="openAssociation(weapon)"
+      >
+        Associer
+      </button>
     </li>
   }
 </ul>
+
+@if (weaponToAssociate(); as weapon) {
+  <app-weapon-association-dialog [weaponId]="weapon.id" (close)="closeAssociation()" />
+}

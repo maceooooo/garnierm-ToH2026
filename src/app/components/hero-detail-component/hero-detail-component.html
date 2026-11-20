@@ -1,6 +1,6 @@
 @if (isLoading()) {
   <p role="status">Chargement du héros…</p>
-} @else if (hero(); as selectedHero) {
+} @else if (heroWithBonuses(); as selectedHero) {
   <!-- Cette page reste en lecture seule; l'édition a une route dédiée. -->
   <div class="entity-detail-title hero-detail-title">
     <h2>Détails de {{ selectedHero.name }}</h2>
@@ -34,20 +34,84 @@
       <div>Favori : {{ selectedHero.favori ? 'Oui ★' : 'Non' }}</div>
     </div>
     <section class="entity-attributes hero-stats" aria-label="Compétences du héros">
-      <p>
+      <p
+        class="hero-stat-row"
+        tabindex="0"
+        [attr.aria-label]="
+          'Points de vie (PV) : ' +
+          selectedHero.stats.pv.total +
+          ', détail ' +
+          selectedHero.stats.pv.breakdown
+        "
+      >
         <app-stat-icon class="stat-icon" kind="pv" />
-        Points de vie (PV) : {{ selectedHero.pv }}
+        Points de vie (PV) :
+        <span class="hero-stat-value">
+          <span class="hero-stat-total">{{ selectedHero.stats.pv.total }}</span>
+          <span class="hero-stat-breakdown" aria-hidden="true">
+            {{ selectedHero.stats.pv.breakdown }}
+          </span>
+        </span>
       </p>
-      <p>
+      <p
+        class="hero-stat-row"
+        tabindex="0"
+        [attr.aria-label]="
+          'Dégâts : ' +
+          selectedHero.stats.degats.total +
+          ', détail ' +
+          selectedHero.stats.degats.breakdown
+        "
+      >
         <app-stat-icon class="stat-icon" kind="degats" />
-        Dégâts : {{ selectedHero.degats }}
+        Dégâts :
+        <span class="hero-stat-value">
+          <span class="hero-stat-total">{{ selectedHero.stats.degats.total }}</span>
+          <span class="hero-stat-breakdown" aria-hidden="true">
+            {{ selectedHero.stats.degats.breakdown }}
+          </span>
+        </span>
       </p>
-      <p>
+      <p
+        class="hero-stat-row"
+        tabindex="0"
+        [attr.aria-label]="
+          'Vitesse : ' +
+          selectedHero.stats.vitesse.total +
+          ', détail ' +
+          selectedHero.stats.vitesse.breakdown
+        "
+      >
         <app-stat-icon class="stat-icon" kind="vitesse" />
-        Vitesse : {{ selectedHero.vitesse }}
+        Vitesse :
+        <span class="hero-stat-value">
+          <span class="hero-stat-total">{{ selectedHero.stats.vitesse.total }}</span>
+          <span class="hero-stat-breakdown" aria-hidden="true">
+            {{ selectedHero.stats.vitesse.breakdown }}
+          </span>
+        </span>
       </p>
     </section>
   </div>
+  <section class="equipped-weapons" aria-labelledby="equipped-weapons-title">
+    <h3 id="equipped-weapons-title">Armes équipées</h3>
+    @if (selectedHero.equippedWeapons.length > 0) {
+      <ul class="equipped-weapon-list">
+        @for (weapon of selectedHero.equippedWeapons; track weapon.id) {
+          <li>
+            <a class="equipped-weapon-link" [routerLink]="['/weapons', weapon.id]">
+              {{ weapon.name }}
+            </a>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="no-equipped-weapons">Aucune arme équipée.</p>
+    }
+  </section>
+  @if (weaponLoadError()) {
+    <p role="alert">Les bonus des armes équipées n’ont pas pu être chargés.</p>
+  }
 } @else {
   <!-- L'état vide fournit une sortie claire au lieu d'afficher des détails incomplets. -->
   <h2>Héros introuvable</h2>

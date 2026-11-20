@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { WeaponInterface } from '../../data/weapon-interface';
+import { HeroService } from '../../services/hero-service';
 import { MessageService } from '../../services/message-service';
 import { InvalidWeaponDocumentError, WeaponService } from '../../services/weapon-service';
 import { WeaponsComponent } from './weapons-component';
@@ -11,22 +12,34 @@ describe('WeaponsComponent', () => {
   let fixture: ComponentFixture<WeaponsComponent>;
   let getWeapons: ReturnType<typeof vi.fn>;
   let addMessage: ReturnType<typeof vi.fn>;
+  let associateHero: ReturnType<typeof vi.fn>;
   const weapon: WeaponInterface = {
     id: 'weapon-a1',
     name: 'Épée',
     bonusPv: 0,
     bonusDegats: 25,
     bonusVitesse: -10,
+    equippedHeroIds: [],
   };
 
   beforeEach(async () => {
     getWeapons = vi.fn(() => of([weapon]));
     addMessage = vi.fn();
+    associateHero = vi.fn().mockResolvedValue(undefined);
     await TestBed.configureTestingModule({
       imports: [WeaponsComponent],
       providers: [
         provideRouter([]),
-        { provide: WeaponService, useValue: { getWeapons } },
+        { provide: WeaponService, useValue: { getWeapons, associateHero } },
+        {
+          provide: HeroService,
+          useValue: {
+            getHeroes: () =>
+              of([
+                { id: 'hero-a1', name: 'Archer', favori: true, pv: 80, degats: 25, vitesse: 60 },
+              ]),
+          },
+        },
         { provide: MessageService, useValue: { add: addMessage } },
       ],
     }).compileComponents();
@@ -53,6 +66,18 @@ describe('WeaponsComponent', () => {
     expect(editLink.getAttribute('href')).toBe('/weapons/weapon-a1/edit');
     expect(editLink.getAttribute('aria-label')).toBe('Modifier Épée');
     expect(createLink.getAttribute('href')).toBe('/weapons/new');
+  });
+
+  it('should open the hero selection dialog from the weapon list', () => {
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.weapon-associate-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Associer l’arme à un héros');
+    expect(fixture.nativeElement.querySelector('.association-hero')?.textContent).toContain(
+      'Archer',
+    );
   });
 
   it('should explain when Firestore denies reading the armes collection', async () => {

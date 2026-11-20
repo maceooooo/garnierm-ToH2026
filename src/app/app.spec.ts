@@ -33,7 +33,14 @@ describe('App', () => {
           useValue: {
             getWeapons: () => of([]),
             getWeapon: (id: string) =>
-              of({ id, name: 'Épée', bonusPv: 0, bonusDegats: 25, bonusVitesse: -10 }),
+              of({
+                id,
+                name: 'Épée',
+                bonusPv: 0,
+                bonusDegats: 25,
+                bonusVitesse: -10,
+                equippedHeroIds: [],
+              }),
             createWeapon: () => Promise.resolve('weapon-a1'),
             updateWeapon: () => Promise.resolve(),
             deleteWeapon: () => Promise.resolve(),

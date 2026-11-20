@@ -4,9 +4,10 @@ import { RouterLink } from '@angular/router';
 import { WeaponInterface } from '../../data/weapon-interface';
 import { MessageService } from '../../services/message-service';
 import { InvalidWeaponDocumentError, WeaponService } from '../../services/weapon-service';
+import { WeaponAssociationDialogComponent } from '../weapon-association-dialog/weapon-association-dialog';
 
 @Component({
-  imports: [RouterLink],
+  imports: [RouterLink, WeaponAssociationDialogComponent],
   selector: 'app-weapons-component',
   styleUrl: './weapons-component.css',
   templateUrl: './weapons-component.html',
@@ -18,6 +19,15 @@ export class WeaponsComponent {
 
   weapons = signal<WeaponInterface[]>([]);
   loadError = signal<string | null>(null);
+  weaponToAssociate = signal<WeaponInterface | null>(null);
+
+  openAssociation(weapon: WeaponInterface): void {
+    this.weaponToAssociate.set(weapon);
+  }
+
+  closeAssociation(): void {
+    this.weaponToAssociate.set(null);
+  }
 
   ngOnInit(): void {
     this.weaponService
@@ -38,7 +48,7 @@ export class WeaponsComponent {
 
   private getLoadErrorMessage(error: unknown): string {
     if (error instanceof InvalidWeaponDocumentError) {
-      return `${error.message} Vérifiez que chaque document contient name et les bonus bonusPv, bonusDegats et bonusVitesse (entiers de -50 à 50).`;
+      return `${error.message} Vérifiez name, les bonus bonusPv, bonusDegats et bonusVitesse (entiers de -50 à 50), ainsi que equippedHeroIds (facultatif, liste d’identifiants de héros).`;
     }
 
     const code = this.getErrorCode(error);

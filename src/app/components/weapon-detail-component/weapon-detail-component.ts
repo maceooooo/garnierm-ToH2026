@@ -7,9 +7,15 @@ import { DeleteConfirmationComponent } from '../delete-confirmation-component/de
 import { StatIconComponent } from '../stat-icon-component/stat-icon-component';
 import { MessageService } from '../../services/message-service';
 import { WeaponService } from '../../services/weapon-service';
+import { WeaponAssociationDialogComponent } from '../weapon-association-dialog/weapon-association-dialog';
 
 @Component({
-  imports: [RouterLink, StatIconComponent, DeleteConfirmationComponent],
+  imports: [
+    RouterLink,
+    StatIconComponent,
+    DeleteConfirmationComponent,
+    WeaponAssociationDialogComponent,
+  ],
   selector: 'app-weapon-detail-component',
   styleUrl: '../shared/entity-detail.css',
   templateUrl: './weapon-detail-component.html',
@@ -25,6 +31,7 @@ export class WeaponDetailComponent implements OnInit {
   isLoading = signal(true);
   isDeleting = signal(false);
   isDeleteConfirmationOpen = signal(false);
+  isAssociationOpen = signal(false);
 
   ngOnInit(): void {
     this.route.paramMap
@@ -58,6 +65,14 @@ export class WeaponDetailComponent implements OnInit {
     if (!this.isDeleting()) {
       this.isDeleteConfirmationOpen.set(false);
     }
+  }
+
+  openAssociation(): void {
+    this.isAssociationOpen.set(true);
+  }
+
+  closeAssociation(): void {
+    this.isAssociationOpen.set(false);
   }
 
   async deleteWeapon(weapon: WeaponInterface): Promise<void> {

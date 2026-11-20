@@ -3,6 +3,7 @@ import {
   DocumentSnapshot,
   Firestore,
   addDoc,
+  arrayUnion,
   collection,
   collectionSnapshots,
   deleteDoc,
@@ -17,8 +18,14 @@ import { WeaponInterface } from '../data/weapon-interface';
 import { MessageService } from './message-service';
 import { revealInitialList } from './progressive-list';
 
+type NewWeapon = Omit<WeaponInterface, 'id' | 'equippedHeroIds'>;
+
 function isValidBonus(value: unknown): value is number {
   return typeof value === 'number' && Number.isInteger(value) && value >= -50 && value <= 50;
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string' && item.length > 0);
 }
 
 export class InvalidWeaponDocumentError extends Error {
@@ -30,13 +37,15 @@ export class InvalidWeaponDocumentError extends Error {
 
 function mapWeaponDocument(document: DocumentSnapshot): WeaponInterface {
   const data = document.data();
+  const equippedHeroIds = data?.['equippedHeroIds'];
   if (
     !data ||
     typeof data['name'] !== 'string' ||
     !data['name'].trim() ||
     !isValidBonus(data['bonusPv']) ||
     !isValidBonus(data['bonusDegats']) ||
-    !isValidBonus(data['bonusVitesse'])
+    !isValidBonus(data['bonusVitesse']) ||
+    (equippedHeroIds !== undefined && !isStringArray(equippedHeroIds))
   ) {
     throw new InvalidWeaponDocumentError(document.id);
   }
@@ -47,6 +56,7 @@ function mapWeaponDocument(document: DocumentSnapshot): WeaponInterface {
     bonusPv: data['bonusPv'],
     bonusDegats: data['bonusDegats'],
     bonusVitesse: data['bonusVitesse'],
+    equippedHeroIds: equippedHeroIds === undefined ? [] : equippedHeroIds,
   };
 }
 
@@ -58,18 +68,21 @@ export class WeaponService {
   /**
    * Écoute la collection d'armes et trie les résultats par nom.
    *
+   * @param revealProgressively Révèle l'instantané initial progressivement pour les listes d'armes.
    * @returns Un Observable réactualisé à chaque changement Firestore.
    * @remarks Les erreurs Firestore et les documents invalides sont émises par l'Observable.
    */
-  getWeapons(): Observable<WeaponInterface[]> {
+  getWeapons(revealProgressively = true): Observable<WeaponInterface[]> {
     const weaponsCollection = collection(this.firestore, 'armes');
     const snapshots = collectionSnapshots(query(weaponsCollection, orderBy('name'))).pipe(
       map((documents) => documents.map(mapWeaponDocument)),
     );
 
-    return revealInitialList(snapshots, 200, () =>
-      this.messageService.add('WeaponService : armes récupérées avec succès'),
-    );
+    return revealProgressively
+      ? revealInitialList(snapshots, 200, () =>
+          this.messageService.add('WeaponService : armes récupérées avec succès'),
+        )
+      : snapshots;
   }
 
   /**
@@ -92,7 +105,7 @@ export class WeaponService {
    * @returns L'identifiant Firestore généré pour le document.
    * @throws Une erreur si le nom ou un bonus est invalide, ou si Firestore refuse l'écriture.
    */
-  async createWeapon(weapon: Omit<WeaponInterface, 'id'>): Promise<string> {
+  async createWeapon(weapon: NewWeapon): Promise<string> {
     const name = weapon.name.trim();
     if (!name) {
       throw new Error('Le nom de l’arme est obligatoire.');
@@ -106,6 +119,7 @@ export class WeaponService {
       bonusPv: weapon.bonusPv,
       bonusDegats: weapon.bonusDegats,
       bonusVitesse: weapon.bonusVitesse,
+      equippedHeroIds: [],
     });
     return createdDocument.id;
   }
@@ -116,7 +130,7 @@ export class WeaponService {
    * @param weapon Arme contenant son identifiant et les valeurs à enregistrer.
    * @returns Une promesse rejetée si les valeurs sont invalides ou si Firestore refuse la mise à jour.
    */
-  updateWeapon(weapon: WeaponInterface): Promise<void> {
+  updateWeapon(weapon: Omit<WeaponInterface, 'equippedHeroIds'>): Promise<void> {
     if (!weapon.name.trim() || !this.hasValidBonuses(weapon)) {
       return Promise.reject(new Error('Le nom et les bonus de l’arme doivent être valides.'));
     }
@@ -126,6 +140,23 @@ export class WeaponService {
       bonusPv: weapon.bonusPv,
       bonusDegats: weapon.bonusDegats,
       bonusVitesse: weapon.bonusVitesse,
+    });
+  }
+
+  /**
+   * Associe une arme à un héros sans dupliquer l'identifiant en cas de requêtes concurrentes.
+   *
+   * @param weaponId Identifiant Firestore de l'arme.
+   * @param heroId Identifiant Firestore du héros équipé.
+   * @returns Une promesse rejetée si Firestore refuse la mise à jour.
+   */
+  associateHero(weaponId: string, heroId: string): Promise<void> {
+    if (!weaponId || !heroId) {
+      return Promise.reject(new Error('Les identifiants de l’arme et du héros sont obligatoires.'));
+    }
+
+    return updateDoc(doc(this.firestore, 'armes', weaponId), {
+      equippedHeroIds: arrayUnion(heroId),
     });
   }
 

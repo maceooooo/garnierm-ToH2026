@@ -12,6 +12,7 @@ import { vi } from 'vitest';
 import { WeaponInterface } from '../../data/weapon-interface';
 import { MessageService } from '../../services/message-service';
 import { WeaponService } from '../../services/weapon-service';
+import { HeroService } from '../../services/hero-service';
 import { WeaponDetailComponent } from './weapon-detail-component';
 
 describe('WeaponDetailComponent', () => {
@@ -26,6 +27,7 @@ describe('WeaponDetailComponent', () => {
     bonusPv: 0,
     bonusDegats: 25,
     bonusVitesse: -10,
+    equippedHeroIds: [],
   };
 
   beforeEach(async () => {
@@ -42,9 +44,20 @@ describe('WeaponDetailComponent', () => {
         {
           provide: WeaponService,
           useValue: {
+            getWeapons: () => of([]),
             getWeapon: (id: string) =>
               of<WeaponInterface | undefined>(id === weapon.id ? weapon : undefined),
             deleteWeapon,
+            associateHero: vi.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: HeroService,
+          useValue: {
+            getHeroes: () =>
+              of([
+                { id: 'hero-a1', name: 'Archer', favori: true, pv: 80, degats: 25, vitesse: 60 },
+              ]),
           },
         },
         { provide: MessageService, useValue: { add: addMessage } },
@@ -86,6 +99,17 @@ describe('WeaponDetailComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Épée');
     expect(deleteWeapon).not.toHaveBeenCalled();
+  });
+
+  it('should open the hero selection dialog from weapon details', () => {
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.weapon-associate-action') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Associer l’arme à un héros');
+    expect(fixture.nativeElement.querySelector('.association-hero')?.textContent).toContain(
+      'Archer',
+    );
   });
 
   it('should delete only after confirmation and return to the weapon list', async () => {

@@ -1,0 +1,59 @@
+<div class="association-backdrop" (click)="close.emit()">
+  <section
+    class="association-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="association-title"
+    (click)="$event.stopPropagation()"
+  >
+    <h2 id="association-title">Associer l’arme à un héros</h2>
+    <label for="hero-search">Rechercher un héros</label>
+    <input
+      id="hero-search"
+      type="search"
+      [value]="searchTerm()"
+      (input)="updateSearchTerm($event)"
+    />
+
+    @if (errorMessage(); as error) {
+      <p class="association-error" role="alert">{{ error }}</p>
+    }
+
+    @if (isLoading()) {
+      <p role="status">Chargement des héros…</p>
+    } @else if (heroes().length === 0) {
+      <p>Aucun héros disponible.</p>
+    } @else if (filteredHeroes().length === 0) {
+      <p>Aucun héros ne correspond à la recherche.</p>
+    } @else {
+      <ul class="association-hero-list">
+        @for (hero of filteredHeroes(); track hero.id) {
+          <li>
+            <button
+              type="button"
+              class="association-hero"
+              [class.selected]="selectedHeroId() === hero.id"
+              [attr.aria-pressed]="selectedHeroId() === hero.id"
+              (click)="selectHero(hero.id)"
+              (dblclick)="confirmOnDoubleClick(hero)"
+            >
+              {{ hero.name }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    <div class="association-actions">
+      <button
+        type="button"
+        class="association-confirm"
+        [disabled]="!selectedHeroId() || isAssociating() || isLoading()"
+        (click)="confirmAssociation()"
+      >
+        {{ isAssociating() ? 'Association…' : 'Confirmer' }}
+      </button>
+      <button type="button" class="association-cancel" (click)="close.emit()">Annuler</button>
+    </div>
+  </section>
+</div>

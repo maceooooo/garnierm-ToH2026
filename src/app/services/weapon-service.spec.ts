@@ -8,6 +8,7 @@ import { WeaponService } from './weapon-service';
 
 const {
   addDocMock,
+  arrayUnionMock,
   collectionMock,
   collectionSnapshotsMock,
   deleteDocMock,
@@ -18,6 +19,7 @@ const {
   updateDocMock,
 } = vi.hoisted(() => ({
   addDocMock: vi.fn(),
+  arrayUnionMock: vi.fn((value: string) => ({ arrayUnion: value })),
   collectionMock: vi.fn(() => ({})),
   collectionSnapshotsMock: vi.fn(),
   deleteDocMock: vi.fn(),
@@ -31,6 +33,7 @@ const {
 vi.mock('@angular/fire/firestore', () => ({
   Firestore: class Firestore {},
   addDoc: addDocMock,
+  arrayUnion: arrayUnionMock,
   collection: collectionMock,
   collectionSnapshots: collectionSnapshotsMock,
   deleteDoc: deleteDocMock,
@@ -50,6 +53,7 @@ describe('WeaponService', () => {
     bonusPv: 0,
     bonusDegats: 25,
     bonusVitesse: -10,
+    equippedHeroIds: [],
   };
 
   beforeEach(() => {
@@ -62,6 +66,7 @@ describe('WeaponService', () => {
             bonusPv: weapon.bonusPv,
             bonusDegats: weapon.bonusDegats,
             bonusVitesse: weapon.bonusVitesse,
+            equippedHeroIds: weapon.equippedHeroIds,
           }),
           id: weapon.id,
         },
@@ -74,6 +79,7 @@ describe('WeaponService', () => {
           bonusPv: weapon.bonusPv,
           bonusDegats: weapon.bonusDegats,
           bonusVitesse: weapon.bonusVitesse,
+          equippedHeroIds: weapon.equippedHeroIds,
         }),
         exists: () => true,
         id: weapon.id,
@@ -111,6 +117,7 @@ describe('WeaponService', () => {
             bonusPv: item.bonusPv,
             bonusDegats: item.bonusDegats,
             bonusVitesse: item.bonusVitesse,
+            equippedHeroIds: item.equippedHeroIds,
           }),
           id: item.id,
         })),
@@ -136,6 +143,11 @@ describe('WeaponService', () => {
     expect(docMock).toHaveBeenCalledWith(expect.anything(), 'armes', weapon.id);
   });
 
+  it('should emit the complete weapon snapshot immediately when progressive reveal is disabled', async () => {
+    await expect(firstValueFrom(service.getWeapons(false))).resolves.toEqual([weapon]);
+    expect(addMessage).not.toHaveBeenCalled();
+  });
+
   it('should return undefined for a missing weapon', async () => {
     docSnapshotsMock.mockReturnValueOnce(of({ exists: () => false, id: 'missing' }));
 
@@ -157,6 +169,7 @@ describe('WeaponService', () => {
       bonusPv: 0,
       bonusDegats: 50,
       bonusVitesse: -50,
+      equippedHeroIds: [],
     });
     expect(collectionMock).toHaveBeenCalledWith(expect.anything(), 'armes');
   });
@@ -205,6 +218,36 @@ describe('WeaponService', () => {
     expect(deleteDocMock).toHaveBeenCalledWith(expect.anything());
   });
 
+  it('should associate a hero id with a weapon using an idempotent array update', async () => {
+    await service.associateHero(weapon.id, 'hero-a1');
+
+    expect(docMock).toHaveBeenCalledWith(expect.anything(), 'armes', weapon.id);
+    expect(arrayUnionMock).toHaveBeenCalledWith('hero-a1');
+    expect(updateDocMock).toHaveBeenCalledWith(expect.anything(), {
+      equippedHeroIds: { arrayUnion: 'hero-a1' },
+    });
+  });
+
+  it('should treat legacy weapons without equipped hero ids as unassociated', async () => {
+    docSnapshotsMock.mockReturnValueOnce(
+      of({
+        data: () => ({
+          name: weapon.name,
+          bonusPv: weapon.bonusPv,
+          bonusDegats: weapon.bonusDegats,
+          bonusVitesse: weapon.bonusVitesse,
+        }),
+        exists: () => true,
+        id: weapon.id,
+      }),
+    );
+
+    await expect(firstValueFrom(service.getWeapon(weapon.id))).resolves.toEqual({
+      ...weapon,
+      equippedHeroIds: [],
+    });
+  });
+
   it('should reject documents with invalid bonus values', async () => {
     collectionSnapshotsMock.mockReturnValueOnce(
       of([
@@ -217,6 +260,26 @@ describe('WeaponService', () => {
 
     await expect(firstValueFrom(service.getWeapons())).rejects.toThrow(
       'Le document arme "invalid-id" ne respecte pas le format attendu.',
+    );
+  });
+
+  it('should reject an invalid equipped hero id list', async () => {
+    docSnapshotsMock.mockReturnValueOnce(
+      of({
+        data: () => ({
+          name: weapon.name,
+          bonusPv: weapon.bonusPv,
+          bonusDegats: weapon.bonusDegats,
+          bonusVitesse: weapon.bonusVitesse,
+          equippedHeroIds: ['hero-a1', ''],
+        }),
+        exists: () => true,
+        id: weapon.id,
+      }),
+    );
+
+    await expect(firstValueFrom(service.getWeapon(weapon.id))).rejects.toThrow(
+      `Le document arme "${weapon.id}" ne respecte pas le format attendu.`,
     );
   });
 });

@@ -2,11 +2,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { ActivatedRoute, convertToParamMap, provideRouter, RouterLink } from '@angular/router';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { vi } from 'vitest';
 import { HeroInterface } from '../../data/heroInterface';
 import { HeroService } from '../../services/hero-service';
 import { MessageService } from '../../services/message-service';
+import { WeaponInterface } from '../../data/weapon-interface';
+import { WeaponService } from '../../services/weapon-service';
 import { HeroDetailComponent } from './hero-detail-component';
 
 // Le paramètre simulé vérifie que la fiche interprète l'identifiant fourni par la route.
@@ -16,11 +18,15 @@ describe('HeroDetailComponent', () => {
   let deleteHero: ReturnType<typeof vi.fn>;
   let addMessage: ReturnType<typeof vi.fn>;
   let navigateByUrl: ReturnType<typeof vi.spyOn>;
+  let getWeapons: ReturnType<typeof vi.fn>;
+  let weaponSnapshots: BehaviorSubject<WeaponInterface[]>;
 
   beforeEach(async () => {
     vi.restoreAllMocks();
     deleteHero = vi.fn().mockResolvedValue(undefined);
     addMessage = vi.fn();
+    weaponSnapshots = new BehaviorSubject<WeaponInterface[]>([]);
+    getWeapons = vi.fn(() => weaponSnapshots.asObservable());
     await TestBed.configureTestingModule({
       imports: [HeroDetailComponent],
       providers: [
@@ -37,6 +43,7 @@ describe('HeroDetailComponent', () => {
             deleteHero,
           },
         },
+        { provide: WeaponService, useValue: { getWeapons } },
         { provide: MessageService, useValue: { add: addMessage } },
         {
           provide: ActivatedRoute,
@@ -60,9 +67,15 @@ describe('HeroDetailComponent', () => {
     fixture.detectChanges();
 
     const skills = fixture.nativeElement.querySelector('.hero-stats') as HTMLElement;
-    expect(skills.textContent).toContain('Points de vie (PV) : 80');
-    expect(skills.textContent).toContain('Dégâts : 25');
-    expect(skills.textContent).toContain('Vitesse : 60');
+    const skillText = skills.textContent?.replace(/\s+/g, ' ') ?? '';
+    expect(skillText).toContain('Points de vie (PV) : 80');
+    expect(skillText).toContain('Dégâts : 25');
+    expect(skillText).toContain('Vitesse : 60');
+    expect(skills.querySelector('.hero-stat-total')?.textContent?.trim()).toBe('80');
+    expect(skills.querySelector('.hero-stat-breakdown')?.textContent?.trim()).toBe('80 + 0');
+    expect(skills.querySelector('.hero-stat-breakdown')?.getAttribute('aria-hidden')).toBe('true');
+    expect(skills.querySelectorAll('p[tabindex="0"]')).toHaveLength(3);
+    expect(skills.querySelectorAll('p[data-tooltip]')).toHaveLength(0);
     expect(skills.querySelectorAll('.stat-icon svg')).toHaveLength(3);
     expect(skills.querySelectorAll('.stat-icon[aria-hidden="true"]')).toHaveLength(3);
     expect(skills.parentElement?.querySelector('.hero-info')).not.toBeNull();
@@ -70,6 +83,82 @@ describe('HeroDetailComponent', () => {
     expect(skills.parentElement?.lastElementChild).toBe(skills);
     expect(skills.classList.contains('entity-attributes')).toBe(true);
     expect(skills.parentElement?.classList.contains('entity-detail-content')).toBe(true);
+  });
+
+  it('should add the bonuses of every equipped weapon to the base statistics', () => {
+    weaponSnapshots.next([
+      {
+        id: 'weapon-a1',
+        name: 'Épée',
+        bonusPv: 10,
+        bonusDegats: 5,
+        bonusVitesse: -2,
+        equippedHeroIds: ['hero-a1'],
+      },
+      {
+        id: 'weapon-b2',
+        name: 'Bouclier',
+        bonusPv: 7,
+        bonusDegats: 0,
+        bonusVitesse: 3,
+        equippedHeroIds: ['hero-a1', 'hero-other'],
+      },
+      {
+        id: 'weapon-c3',
+        name: 'Autre arme',
+        bonusPv: 100,
+        bonusDegats: 100,
+        bonusVitesse: 100,
+        equippedHeroIds: ['hero-other'],
+      },
+    ]);
+
+    expect(component.heroWithBonuses()?.stats).toEqual({
+      pv: { total: 97, breakdown: '80 + 17' },
+      degats: { total: 30, breakdown: '25 + 5' },
+      vitesse: { total: 61, breakdown: '60 + 1' },
+    });
+  });
+
+  it('should display only linked equipped weapon names beneath hero details', () => {
+    weaponSnapshots.next([
+      {
+        id: 'weapon-a1',
+        name: 'Épée',
+        bonusPv: 10,
+        bonusDegats: -5,
+        bonusVitesse: 0,
+        equippedHeroIds: ['hero-a1'],
+      },
+    ]);
+    fixture.detectChanges();
+
+    const section = fixture.nativeElement.querySelector('.equipped-weapons') as HTMLElement;
+    const heroDetails = fixture.nativeElement.querySelector('.hero-detail-content') as HTMLElement;
+    const weaponLink = section.querySelector('.equipped-weapon-link') as HTMLAnchorElement;
+    expect(heroDetails.nextElementSibling).toBe(section);
+    expect(weaponLink.parentElement?.tagName).toBe('LI');
+    expect(weaponLink.classList.contains('equipped-weapon-link')).toBe(true);
+    expect(getComputedStyle(weaponLink).width).toBe('140px');
+    expect(getComputedStyle(weaponLink).minHeight).toBe('36px');
+    expect(weaponLink.textContent?.trim()).toBe('Épée');
+    expect(weaponLink.getAttribute('href')).toBe('/weapons/weapon-a1');
+    expect(section.textContent?.replace(/\s+/g, ' ').trim()).toBe('Armes équipées Épée');
+    const statRows = fixture.nativeElement.querySelectorAll(
+      '.hero-stats p',
+    ) as NodeListOf<HTMLParagraphElement>;
+    expect(statRows[0].querySelector('.hero-stat-total')?.textContent?.trim()).toBe('90');
+    expect(statRows[0].querySelector('.hero-stat-breakdown')?.textContent?.trim()).toBe('80 + 10');
+    expect(statRows[1].querySelector('.hero-stat-total')?.textContent?.trim()).toBe('20');
+    expect(statRows[1].querySelector('.hero-stat-breakdown')?.textContent?.trim()).toBe('25 − 5');
+  });
+
+  it('should explain when the hero has no equipped weapons', () => {
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.no-equipped-weapons')?.textContent).toContain(
+      'Aucune arme équipée.',
+    );
   });
 
   it('should render accessible edit and delete icon buttons beside the title', () => {
