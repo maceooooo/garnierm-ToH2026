@@ -23,6 +23,8 @@
       <p role="status">Chargement des héros…</p>
     } @else if (heroes().length === 0) {
       <p>Aucun héros disponible.</p>
+    } @else if (availableHeroes().length === 0) {
+      <p>Tous les héros sont déjà équipés de cette arme.</p>
     } @else if (filteredHeroes().length === 0) {
       <p>Aucun héros ne correspond à la recherche.</p>
     } @else {

@@ -8,6 +8,7 @@ import { WeaponService } from './weapon-service';
 
 const {
   addDocMock,
+  arrayRemoveMock,
   arrayUnionMock,
   collectionMock,
   collectionSnapshotsMock,
@@ -19,6 +20,7 @@ const {
   updateDocMock,
 } = vi.hoisted(() => ({
   addDocMock: vi.fn(),
+  arrayRemoveMock: vi.fn((value: string) => ({ arrayRemove: value })),
   arrayUnionMock: vi.fn((value: string) => ({ arrayUnion: value })),
   collectionMock: vi.fn(() => ({})),
   collectionSnapshotsMock: vi.fn(),
@@ -33,6 +35,7 @@ const {
 vi.mock('@angular/fire/firestore', () => ({
   Firestore: class Firestore {},
   addDoc: addDocMock,
+  arrayRemove: arrayRemoveMock,
   arrayUnion: arrayUnionMock,
   collection: collectionMock,
   collectionSnapshots: collectionSnapshotsMock,
@@ -225,6 +228,16 @@ describe('WeaponService', () => {
     expect(arrayUnionMock).toHaveBeenCalledWith('hero-a1');
     expect(updateDocMock).toHaveBeenCalledWith(expect.anything(), {
       equippedHeroIds: { arrayUnion: 'hero-a1' },
+    });
+  });
+
+  it('should remove only the requested hero id from a weapon association list', async () => {
+    await service.disassociateHero(weapon.id, 'hero-a1');
+
+    expect(docMock).toHaveBeenCalledWith(expect.anything(), 'armes', weapon.id);
+    expect(arrayRemoveMock).toHaveBeenCalledWith('hero-a1');
+    expect(updateDocMock).toHaveBeenCalledWith(expect.anything(), {
+      equippedHeroIds: { arrayRemove: 'hero-a1' },
     });
   });
 

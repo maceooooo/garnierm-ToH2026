@@ -19,6 +19,7 @@ describe('HeroDetailComponent', () => {
   let addMessage: ReturnType<typeof vi.fn>;
   let navigateByUrl: ReturnType<typeof vi.spyOn>;
   let getWeapons: ReturnType<typeof vi.fn>;
+  let disassociateHero: ReturnType<typeof vi.fn>;
   let weaponSnapshots: BehaviorSubject<WeaponInterface[]>;
 
   beforeEach(async () => {
@@ -27,6 +28,7 @@ describe('HeroDetailComponent', () => {
     addMessage = vi.fn();
     weaponSnapshots = new BehaviorSubject<WeaponInterface[]>([]);
     getWeapons = vi.fn(() => weaponSnapshots.asObservable());
+    disassociateHero = vi.fn().mockResolvedValue(undefined);
     await TestBed.configureTestingModule({
       imports: [HeroDetailComponent],
       providers: [
@@ -43,7 +45,7 @@ describe('HeroDetailComponent', () => {
             deleteHero,
           },
         },
-        { provide: WeaponService, useValue: { getWeapons } },
+        { provide: WeaponService, useValue: { getWeapons, disassociateHero } },
         { provide: MessageService, useValue: { add: addMessage } },
         {
           provide: ActivatedRoute,
@@ -72,7 +74,7 @@ describe('HeroDetailComponent', () => {
     expect(skillText).toContain('Dégâts : 25');
     expect(skillText).toContain('Vitesse : 60');
     expect(skills.querySelector('.hero-stat-total')?.textContent?.trim()).toBe('80');
-    expect(skills.querySelector('.hero-stat-breakdown')?.textContent?.trim()).toBe('80 + 0');
+    expect(skills.querySelector('.hero-stat-breakdown')?.textContent?.trim()).toBe('80');
     expect(skills.querySelector('.hero-stat-breakdown')?.getAttribute('aria-hidden')).toBe('true');
     expect(skills.querySelectorAll('p[tabindex="0"]')).toHaveLength(3);
     expect(skills.querySelectorAll('p[data-tooltip]')).toHaveLength(0);
@@ -114,9 +116,9 @@ describe('HeroDetailComponent', () => {
     ]);
 
     expect(component.heroWithBonuses()?.stats).toEqual({
-      pv: { total: 97, breakdown: '80 + 17' },
+      pv: { total: 97, breakdown: '80 + 10 + 7' },
       degats: { total: 30, breakdown: '25 + 5' },
-      vitesse: { total: 61, breakdown: '60 + 1' },
+      vitesse: { total: 61, breakdown: '60 − 2 + 3' },
     });
   });
 
@@ -143,7 +145,7 @@ describe('HeroDetailComponent', () => {
     expect(getComputedStyle(weaponLink).minHeight).toBe('36px');
     expect(weaponLink.textContent?.trim()).toBe('Épée');
     expect(weaponLink.getAttribute('href')).toBe('/weapons/weapon-a1');
-    expect(section.textContent?.replace(/\s+/g, ' ').trim()).toBe('Armes équipées Épée');
+    expect(section.textContent?.replace(/\s+/g, ' ').trim()).toBe('Armes équipées Épée ×');
     const statRows = fixture.nativeElement.querySelectorAll(
       '.hero-stats p',
     ) as NodeListOf<HTMLParagraphElement>;
@@ -158,6 +160,84 @@ describe('HeroDetailComponent', () => {
 
     expect(fixture.nativeElement.querySelector('.no-equipped-weapons')?.textContent).toContain(
       'Aucune arme équipée.',
+    );
+  });
+
+  it('should ask for confirmation before detaching an equipped weapon', () => {
+    weaponSnapshots.next([
+      {
+        id: 'weapon-a1',
+        name: 'Épée',
+        bonusPv: 10,
+        bonusDegats: 0,
+        bonusVitesse: 0,
+        equippedHeroIds: ['hero-a1'],
+      },
+    ]);
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.detach-weapon-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Détacher l’arme ?');
+    expect(fixture.nativeElement.textContent).toContain('« Épée » sera détachée de Hero A.');
+    expect(disassociateHero).not.toHaveBeenCalled();
+  });
+
+  it('should cancel detaching without changing the weapon association', () => {
+    const weapon: WeaponInterface = {
+      id: 'weapon-a1',
+      name: 'Épée',
+      bonusPv: 10,
+      bonusDegats: 0,
+      bonusVitesse: 0,
+      equippedHeroIds: ['hero-a1'],
+    };
+    component.openDetachConfirmation(weapon);
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.delete-cancel-button') as HTMLButtonElement).click();
+
+    expect(component.weaponToDetach()).toBeNull();
+    expect(disassociateHero).not.toHaveBeenCalled();
+  });
+
+  it('should detach the weapon after confirmation', async () => {
+    const weapon: WeaponInterface = {
+      id: 'weapon-a1',
+      name: 'Épée',
+      bonusPv: 10,
+      bonusDegats: 0,
+      bonusVitesse: 0,
+      equippedHeroIds: ['hero-a1'],
+    };
+    component.openDetachConfirmation(weapon);
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.delete-confirm-button') as HTMLButtonElement).click();
+    await fixture.whenStable();
+
+    expect(disassociateHero).toHaveBeenCalledWith('weapon-a1', 'hero-a1');
+    expect(component.weaponToDetach()).toBeNull();
+    expect(addMessage).toHaveBeenCalledWith('L’arme « Épée » a été détachée de Hero A.');
+  });
+
+  it('should keep the confirmation open and report errors when detaching fails', async () => {
+    disassociateHero.mockRejectedValueOnce(new Error('permission-denied'));
+    const weapon: WeaponInterface = {
+      id: 'weapon-a1',
+      name: 'Épée',
+      bonusPv: 10,
+      bonusDegats: 0,
+      bonusVitesse: 0,
+      equippedHeroIds: ['hero-a1'],
+    };
+    component.openDetachConfirmation(weapon);
+
+    await component.detachWeapon(component.hero()!, weapon);
+
+    expect(component.weaponToDetach()).toEqual(weapon);
+    expect(component.isDetachingWeapon()).toBe(false);
+    expect(addMessage).toHaveBeenCalledWith(
+      'Impossible de détacher l’arme. Vérifiez la connexion et les règles Firestore.',
     );
   });
 

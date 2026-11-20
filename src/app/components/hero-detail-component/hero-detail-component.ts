@@ -26,6 +26,8 @@ export class HeroDetailComponent implements OnInit {
 
   isDeleting = signal(false);
   isDeleteConfirmationOpen = signal(false);
+  isDetachingWeapon = signal(false);
+  weaponToDetach = signal<WeaponInterface | null>(null);
   isLoading = signal(true);
   weapons = signal<WeaponInterface[]>([]);
   weaponLoadError = signal(false);
@@ -41,26 +43,36 @@ export class HeroDetailComponent implements OnInit {
     const equippedWeapons = this.weapons().filter((weapon) =>
       weapon.equippedHeroIds.includes(hero.id),
     );
-    const bonusPv = equippedWeapons.reduce((total, weapon) => total + weapon.bonusPv, 0);
-    const bonusDegats = equippedWeapons.reduce((total, weapon) => total + weapon.bonusDegats, 0);
-    const bonusVitesse = equippedWeapons.reduce((total, weapon) => total + weapon.bonusVitesse, 0);
-
     return {
       ...hero,
       equippedWeapons,
       stats: {
-        pv: this.getStatDetails(hero.pv, bonusPv),
-        degats: this.getStatDetails(hero.degats, bonusDegats),
-        vitesse: this.getStatDetails(hero.vitesse, bonusVitesse),
+        pv: this.getStatDetails(
+          hero.pv,
+          equippedWeapons.map((weapon) => weapon.bonusPv),
+        ),
+        degats: this.getStatDetails(
+          hero.degats,
+          equippedWeapons.map((weapon) => weapon.bonusDegats),
+        ),
+        vitesse: this.getStatDetails(
+          hero.vitesse,
+          equippedWeapons.map((weapon) => weapon.bonusVitesse),
+        ),
       },
     };
   });
 
-  private getStatDetails(base: number, bonus: number): { total: number; breakdown: string } {
-    const operator = bonus < 0 ? '−' : '+';
+  private getStatDetails(base: number, bonuses: number[]): { total: number; breakdown: string } {
+    const totalBonus = bonuses.reduce((total, bonus) => total + bonus, 0);
+    const breakdown = bonuses
+      .filter((bonus) => bonus !== 0)
+      .map((bonus) => `${bonus < 0 ? '−' : '+'} ${Math.abs(bonus)}`)
+      .join(' ');
+
     return {
-      total: base + bonus,
-      breakdown: `${base} ${operator} ${Math.abs(bonus)}`,
+      total: base + totalBonus,
+      breakdown: breakdown ? `${base} ${breakdown}` : `${base}`,
     };
   }
 
@@ -112,6 +124,39 @@ export class HeroDetailComponent implements OnInit {
     if (!this.isDeleting()) {
       this.isDeleteConfirmationOpen.set(false);
     }
+  }
+
+  openDetachConfirmation(weapon: WeaponInterface): void {
+    if (!this.isDetachingWeapon()) {
+      this.weaponToDetach.set(weapon);
+    }
+  }
+
+  closeDetachConfirmation(): void {
+    if (!this.isDetachingWeapon()) {
+      this.weaponToDetach.set(null);
+    }
+  }
+
+  async detachWeapon(hero: HeroInterface, weapon: WeaponInterface): Promise<void> {
+    if (this.isDetachingWeapon()) {
+      return;
+    }
+
+    this.isDetachingWeapon.set(true);
+    try {
+      await this.weaponService.disassociateHero(weapon.id, hero.id);
+    } catch {
+      this.isDetachingWeapon.set(false);
+      this.messageService.add(
+        'Impossible de détacher l’arme. Vérifiez la connexion et les règles Firestore.',
+      );
+      return;
+    }
+
+    this.isDetachingWeapon.set(false);
+    this.weaponToDetach.set(null);
+    this.messageService.add(`L’arme « ${weapon.name} » a été détachée de ${hero.name}.`);
   }
 
   async deleteHero(hero: HeroInterface): Promise<void> {

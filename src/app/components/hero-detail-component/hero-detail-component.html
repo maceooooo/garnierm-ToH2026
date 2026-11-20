@@ -102,6 +102,15 @@
             <a class="equipped-weapon-link" [routerLink]="['/weapons', weapon.id]">
               {{ weapon.name }}
             </a>
+            <button
+              type="button"
+              class="detach-weapon-button"
+              [attr.aria-label]="'Détacher ' + weapon.name + ' de ' + selectedHero.name"
+              title="Détacher l’arme"
+              (click)="openDetachConfirmation(weapon)"
+            >
+              ×
+            </button>
           </li>
         }
       </ul>
@@ -126,4 +135,19 @@
     (cancel)="closeDeleteConfirmation()"
     (confirm)="deleteHero(selectedHero)"
   />
+}
+
+@if (weaponToDetach(); as weapon) {
+  @if (hero(); as selectedHero) {
+    <app-delete-confirmation
+      [itemName]="weapon.name"
+      [dialogTitle]="'Détacher l’arme ?'"
+      [description]="'« ' + weapon.name + ' » sera détachée de ' + selectedHero.name + '.'"
+      [confirmLabel]="'Détacher'"
+      [progressLabel]="'Détachement…'"
+      [isDeleting]="isDetachingWeapon()"
+      (cancel)="closeDetachConfirmation()"
+      (confirm)="detachWeapon(selectedHero, weapon)"
+    />
+  }
 }

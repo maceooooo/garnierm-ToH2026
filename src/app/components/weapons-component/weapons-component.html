@@ -35,5 +35,9 @@
 </ul>
 
 @if (weaponToAssociate(); as weapon) {
-  <app-weapon-association-dialog [weaponId]="weapon.id" (close)="closeAssociation()" />
+  <app-weapon-association-dialog
+    [weaponId]="weapon.id"
+    [equippedHeroIds]="weapon.equippedHeroIds"
+    (close)="closeAssociation()"
+  />
 }

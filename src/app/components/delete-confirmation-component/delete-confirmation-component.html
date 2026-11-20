@@ -7,8 +7,10 @@
     aria-describedby="delete-dialog-description"
     (click)="$event.stopPropagation()"
   >
-    <h2 id="delete-dialog-title">Supprimer l’élément ?</h2>
-    <p id="delete-dialog-description">« {{ itemName() }} » sera définitivement supprimé.</p>
+    <h2 id="delete-dialog-title">{{ dialogTitle() }}</h2>
+    <p id="delete-dialog-description">
+      {{ description() ?? '« ' + itemName() + ' » sera définitivement supprimé.' }}
+    </p>
     <div class="delete-dialog-actions">
       <button
         type="button"
@@ -24,7 +26,7 @@
         [disabled]="isDeleting()"
         (click)="confirm.emit()"
       >
-        {{ isDeleting() ? 'Suppression…' : 'Supprimer' }}
+        {{ isDeleting() ? progressLabel() : confirmLabel() }}
       </button>
     </div>
   </section>

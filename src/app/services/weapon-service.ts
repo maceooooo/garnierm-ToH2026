@@ -3,6 +3,7 @@ import {
   DocumentSnapshot,
   Firestore,
   addDoc,
+  arrayRemove,
   arrayUnion,
   collection,
   collectionSnapshots,
@@ -157,6 +158,23 @@ export class WeaponService {
 
     return updateDoc(doc(this.firestore, 'armes', weaponId), {
       equippedHeroIds: arrayUnion(heroId),
+    });
+  }
+
+  /**
+   * Détache un héros d'une arme sans modifier les autres associations.
+   *
+   * @param weaponId Identifiant Firestore de l'arme.
+   * @param heroId Identifiant Firestore du héros à détacher.
+   * @returns Une promesse rejetée si Firestore refuse la mise à jour.
+   */
+  disassociateHero(weaponId: string, heroId: string): Promise<void> {
+    if (!weaponId || !heroId) {
+      return Promise.reject(new Error('Les identifiants de l’arme et du héros sont obligatoires.'));
+    }
+
+    return updateDoc(doc(this.firestore, 'armes', weaponId), {
+      equippedHeroIds: arrayRemove(heroId),
     });
   }
 

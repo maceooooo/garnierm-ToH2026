@@ -30,6 +30,7 @@ describe('WeaponAssociationDialogComponent', () => {
 
     fixture = TestBed.createComponent(WeaponAssociationDialogComponent);
     fixture.componentRef.setInput('weaponId', 'weapon-a1');
+    fixture.componentRef.setInput('equippedHeroIds', ['hero-a1']);
     fixture.detectChanges();
   });
 
@@ -60,12 +61,33 @@ describe('WeaponAssociationDialogComponent', () => {
     heroButton.dispatchEvent(new MouseEvent('dblclick'));
     await fixture.whenStable();
 
-    expect(associateHero).toHaveBeenCalledWith('weapon-a1', 'hero-a1');
+    expect(associateHero).toHaveBeenCalledWith('weapon-a1', 'hero-b2');
+  });
+
+  it('should hide heroes already equipped with the weapon', () => {
+    fixture.detectChanges();
+
+    const heroButtons = fixture.nativeElement.querySelectorAll(
+      '.association-hero',
+    ) as NodeListOf<HTMLButtonElement>;
+    expect(heroButtons).toHaveLength(1);
+    expect(heroButtons[0].textContent).toContain('Berserker');
+    expect(heroButtons[0].textContent).not.toContain('Archer');
+  });
+
+  it('should explain when all heroes are already equipped with the weapon', () => {
+    fixture.componentRef.setInput('equippedHeroIds', ['hero-a1', 'hero-b2']);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain(
+      'Tous les héros sont déjà équipés de cette arme.',
+    );
+    expect(fixture.nativeElement.querySelector('.association-hero')).toBeNull();
   });
 
   it('should keep the dialog open and report association errors', async () => {
     associateHero.mockRejectedValueOnce(new Error('permission-denied'));
-    fixture.componentInstance.selectHero('hero-a1');
+    fixture.componentInstance.selectHero('hero-b2');
     await fixture.componentInstance.confirmAssociation();
     fixture.detectChanges();
 

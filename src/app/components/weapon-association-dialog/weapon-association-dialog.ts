@@ -12,6 +12,7 @@ import { WeaponService } from '../../services/weapon-service';
 })
 export class WeaponAssociationDialogComponent {
   weaponId = input.required<string>();
+  equippedHeroIds = input<string[]>([]);
   close = output<void>();
 
   private destroyRef = inject(DestroyRef);
@@ -26,9 +27,16 @@ export class WeaponAssociationDialogComponent {
   isAssociating = signal(false);
   errorMessage = signal<string | null>(null);
 
+  availableHeroes = computed(() => {
+    const equippedHeroIds = new Set(this.equippedHeroIds());
+    return this.heroes().filter((hero) => !equippedHeroIds.has(hero.id));
+  });
+
   filteredHeroes = computed(() => {
     const search = this.searchTerm().trim().toLocaleLowerCase('fr');
-    return this.heroes().filter((hero) => hero.name.toLocaleLowerCase('fr').includes(search));
+    return this.availableHeroes().filter((hero) =>
+      hero.name.toLocaleLowerCase('fr').includes(search),
+    );
   });
 
   ngOnInit(): void {
@@ -60,7 +68,7 @@ export class WeaponAssociationDialogComponent {
   }
 
   async confirmAssociation(): Promise<void> {
-    const selectedHero = this.heroes().find((hero) => hero.id === this.selectedHeroId());
+    const selectedHero = this.availableHeroes().find((hero) => hero.id === this.selectedHeroId());
     if (!selectedHero || this.isAssociating()) {
       return;
     }
